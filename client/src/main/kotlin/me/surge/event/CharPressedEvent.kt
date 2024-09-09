@@ -1,4 +1,3 @@
 package me.surge.event
 
-class CharPressedEvent {
-}
+class CharPressedEvent(val char: Char)

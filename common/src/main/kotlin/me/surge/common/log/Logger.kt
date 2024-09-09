@@ -1,4 +1,4 @@
-package me.surge.common
+package me.surge.common.log
 
 import java.text.SimpleDateFormat
 import java.util.Date

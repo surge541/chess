@@ -1,4 +1,5 @@
 package me.surge.event
 
-class ClickEvent {
-}
+import me.surge.util.Button
+
+class ClickEvent(val mouseX: Float, val mouseY: Float, val button: Button)

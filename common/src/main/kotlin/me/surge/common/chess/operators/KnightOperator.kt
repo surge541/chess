@@ -3,33 +3,43 @@ package me.surge.common.chess.operators
 import me.surge.common.chess.Board
 import me.surge.common.chess.Cell
 import me.surge.common.chess.Side
+import me.surge.common.chess.operators.KingOperator.removeMarkedCells
 
-object BishopOperator : Operator {
+object KnightOperator : Operator {
 
-    override fun collectTiles(cell: Cell, board: Board, side: Side): List<Cell> {
+    //  x    y
+    @JvmStatic val offsets = listOf(
+        1 to -2,
+        2 to -1,
+
+        2 to 1,
+        1 to 2,
+
+        -1 to -2,
+        -2 to -1,
+
+        -2 to 1,
+        -1 to 2
+    )
+
+    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Cell> {
         val cells = mutableListOf<Cell>()
 
-        var x = cell.x
-        var y = cell.y
+        offsets.forEach { (x, y) ->
+            val selected = board.findNullable(cell.x + x, cell.y + y)
 
-        // top left
-        while (x > 0 && y > 0) {
-            val selected = board.find(x, y)
+            if (selected != null) {
+                // one of our pieces, we can't take
+                if (selected.piece.second == side) {
+                    return@forEach
+                }
 
-            // one of our pieces, we can't take
-            if (selected.piece.second == side) {
-                break
+                cells.add(selected)
             }
+        }
 
-            cells.add(selected)
-
-            // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
-            if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
-                break
-            }
-
-            x--
-            y--
+        if (removeMarked) {
+            removeMarkedCells(cell, cells, board, side)
         }
 
         return cells
