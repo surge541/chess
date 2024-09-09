@@ -1,0 +1,16 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group = 'me.surge'
+version = '1.0-SNAPSHOT'
+
+repositories.mavenCentral()
+
+dependencies {
+    implementation "org.json:json:$json"
+}
+
+kotlin {
+    jvmToolchain(21)
+}

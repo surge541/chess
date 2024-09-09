@@ -1,0 +1,34 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group = 'me.surge'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation project(":common")
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjgl")
+
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-nanovg"
+    implementation "org.lwjgl:lwjgl-opengl"
+    runtimeOnly "org.lwjgl:lwjgl::$natives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$natives"
+    runtimeOnly "org.lwjgl:lwjgl-nanovg::$natives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$natives"
+
+    implementation "com.github.surge541:NVGU:$nvgu"
+    implementation "com.github.surge541:JavaAnimationSystem:$animations"
+    implementation "com.github.surge541:amalia:$amalia"
+    implementation "org.json:json:$json"
+}
+
+kotlin {
+    jvmToolchain(21)
+}

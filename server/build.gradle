@@ -1,0 +1,22 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group = 'me.surge'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation project(":common")
+    implementation "org.json:json:$json"
+    implementation "com.github.surge541:amalia:$amalia"
+    implementation "org.xerial:sqlite-jdbc:$sqlite"
+}
+
+kotlin {
+    jvmToolchain(21)
+}
