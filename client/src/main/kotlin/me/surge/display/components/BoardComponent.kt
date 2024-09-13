@@ -153,7 +153,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
             }*/
         }
 
-        packet.game!!.moves.filter { move -> !moves.any { renderMove -> renderMove.move == move } }.forEach { move ->
+        packet.game!!.board.moves.filter { move -> !moves.any { renderMove -> renderMove.move == move } }.forEach { move ->
             moves.add(RenderMove(move, cells.first { it.cell == move.from }, cells.first { it.cell == move.to }))
         }
     }
