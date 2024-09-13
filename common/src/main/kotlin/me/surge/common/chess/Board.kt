@@ -5,6 +5,7 @@ import me.surge.common.chess.Side.*
 import me.surge.common.chess.operators.KingOperator
 import me.surge.common.packet.IEmbeddable
 import org.json.JSONObject
+import java.util.concurrent.CopyOnWriteArrayList
 
 class Board {
 
@@ -21,6 +22,8 @@ class Board {
             }
         }
     }
+
+    val moves = CopyOnWriteArrayList<Move>()
 
     fun find(x: Int, y: Int): Cell = cells.find { cell -> cell.x == x && cell.y == y }!!
     fun findNullable(x: Int, y: Int): Cell? = cells.find { cell -> cell.x == x && cell.y == y }
@@ -54,6 +57,8 @@ class Board {
         resultant.inherit(starting, this)
 
         rookSwap?.second?.inherit(rookSwap.first, this)
+
+        moves.add(move)
     }
 
     fun findKing(side: Side): Cell {
@@ -151,9 +156,7 @@ class Board {
         }
 
         override fun embed(obj: Board) = JSONObject().also {
-            obj.cells.forEach { cell ->
-                it.put("cell${cell.x}${cell.y}", Cell.embed(cell))
-            }
+            it.put("moves", embedMoves(obj.moves))
         }
 
         override fun extract(key: String?, json: JSONObject): Board? {
@@ -164,13 +167,45 @@ class Board {
 
             val board = Board()
 
-            board.cells.forEach { cell ->
-                val cellObj = Cell.extract("cell${cell.x}${cell.y}", obj)
-                cell.piece = cellObj!!.piece
-                cell.moved = cellObj.moved
+            val moves = extractMoves(obj.getString("moves"), board)
+
+            return board.also {
+                moves.forEach { move ->
+                    it.set(move)
+                }
+            }
+        }
+
+        private fun embedMoves(moves: List<Move>) = buildString {
+            for (move in moves) {
+                append("[${move.from.x},${move.from.y},${move.to.x},${move.to.y}")
+            }
+        }
+
+        private fun extractMoves(string: String, board: Board): List<Move> {
+            if (string.isEmpty()) {
+                return emptyList()
             }
 
-            return board
+            val moves = mutableListOf<Move>()
+            var side = WHITE
+
+            val splitMoves = string.split("[")
+
+            splitMoves.forEach {
+                // first is always empty
+                if (it.isEmpty()) {
+                    return@forEach
+                }
+
+                val parts = it.split(",")
+
+                moves.add(Move(side, board.find(parts[0].toInt(), parts[1].toInt()), board.find(parts[2].toInt(), parts[3].toInt())))
+
+                side = if (side == WHITE) BLACK else WHITE
+            }
+
+            return moves
         }
 
     }
