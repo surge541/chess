@@ -5,6 +5,7 @@ import me.surge.common.chess.Side.*
 import me.surge.common.chess.operators.KingOperator
 import me.surge.common.packet.IEmbeddable
 import org.json.JSONObject
+import java.util.concurrent.CopyOnWriteArrayList
 
 class Board {
 
@@ -22,6 +23,8 @@ class Board {
         }
     }
 
+    val moves = CopyOnWriteArrayList<Move>()
+
     fun find(x: Int, y: Int): Cell = cells.find { cell -> cell.x == x && cell.y == y }!!
     fun findNullable(x: Int, y: Int): Cell? = cells.find { cell -> cell.x == x && cell.y == y }
 
@@ -37,9 +40,9 @@ class Board {
         var rookSwap: Pair<Cell, Cell>? = null
 
         if (!starting.moved && starting.piece.first == KING) {
-            val castlingData = KingOperator.getCastlingCells(starting, this)
+            val castlingData = KingOperator.getCastlingMoves(starting, this)
 
-            if (castlingData.first.contains(resultant)) {
+            if (castlingData.first.any { it.to == resultant}) {
                 // king side
                 if (resultant.x > starting.x) {
                     val rook = castlingData.second.first!!
@@ -51,9 +54,16 @@ class Board {
             }
         }
 
-        resultant.inherit(starting, this)
+        resultant.inherit(starting)
 
-        rookSwap?.second?.inherit(rookSwap.first, this)
+        rookSwap?.second?.inherit(rookSwap.first)
+
+        if (move.claimCell != null) {
+            val claimed = find(move.claimCell!!.x, move.claimCell!!.y)
+            claimed.inherit(Cell(move.claimCell!!.x, move.claimCell!!.y, EMPTY to EITHER))
+        }
+
+        moves.add(move)
     }
 
     fun findKing(side: Side): Cell {
@@ -70,6 +80,19 @@ class Board {
                 it.moved = true
             })
         }
+    }
+
+    fun sync(remote: Board) {
+        remote.cells.forEach { remoteCell ->
+            this.cells.first { localCell ->
+                localCell.x == remoteCell.x && localCell.y == remoteCell.y
+            }.also {
+                it.piece = remoteCell.piece
+                it.moved = remoteCell.moved
+            }
+        }
+
+        moves.addAll(remote.moves.filter { !moves.contains(it) })
     }
 
     override fun toString(): String {
@@ -103,7 +126,7 @@ class Board {
     companion object : IEmbeddable<Board> {
 
         val initialCells = arrayListOf(
-            Cell(0, 0, ROOK to BLACK),
+            /*Cell(0, 0, ROOK to BLACK),
             Cell(1, 0, KNIGHT to BLACK),
             Cell(2, 0, BISHOP to BLACK),
             Cell(3, 0, QUEEN to BLACK),
@@ -119,7 +142,7 @@ class Board {
             Cell(4, 7, KING to WHITE),
             Cell(5, 7, BISHOP to WHITE),
             Cell(6, 7, KNIGHT to WHITE),
-            Cell(7, 7, ROOK to WHITE)
+            Cell(7, 7, ROOK to WHITE)*/
 
             // Rook Backrank Checkmate
             /*Cell(7, 7, KING to WHITE),
@@ -139,6 +162,12 @@ class Board {
             Cell(0, 7, ROOK to WHITE),
             Cell(4, 7, KING to WHITE),
             Cell(7, 7, ROOK to WHITE)*/
+
+            Cell(0, 0, KING to BLACK),
+            Cell(0, 7, KING to WHITE),
+            Cell(0, 1, PAWN to BLACK),
+            Cell(1, 3, PAWN to WHITE),
+            Cell(2, 3, PAWN to WHITE),
         ).also {
             fun pawns(y: Int, side: Side) {
                 for (x in 0 until 8) {
@@ -146,14 +175,12 @@ class Board {
                 }
             }
 
-            pawns(1, BLACK)
-            pawns(6, WHITE)
+            //pawns(1, BLACK)
+            //pawns(6, WHITE)
         }
 
         override fun embed(obj: Board) = JSONObject().also {
-            obj.cells.forEach { cell ->
-                it.put("cell${cell.x}${cell.y}", Cell.embed(cell))
-            }
+            it.put("moves", embedMoves(obj.moves))
         }
 
         override fun extract(key: String?, json: JSONObject): Board? {
@@ -164,13 +191,44 @@ class Board {
 
             val board = Board()
 
-            board.cells.forEach { cell ->
-                val cellObj = Cell.extract("cell${cell.x}${cell.y}", obj)
-                cell.piece = cellObj!!.piece
-                cell.moved = cellObj.moved
+            val moves = extractMoves(obj.getString("moves"), board)
+
+            return board.also {
+                moves.forEach { move ->
+                    it.set(move)
+                }
+            }
+        }
+
+        private fun embedMoves(moves: List<Move>) = buildString {
+            for (move in moves) {
+                append("[")
+                append(move.write())
+            }
+        }
+
+        private fun extractMoves(string: String, board: Board): List<Move> {
+            if (string.isEmpty()) {
+                return emptyList()
             }
 
-            return board
+            val moves = mutableListOf<Move>()
+            var side = WHITE
+
+            val splitMoves = string.split("[")
+
+            splitMoves.forEach {
+                // first is always empty
+                if (it.isEmpty()) {
+                    return@forEach
+                }
+
+                moves.add(Move.read(it, board, side))
+
+                side = if (side == WHITE) BLACK else WHITE
+            }
+
+            return moves
         }
 
     }

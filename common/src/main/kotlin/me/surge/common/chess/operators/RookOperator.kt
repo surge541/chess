@@ -2,13 +2,14 @@ package me.surge.common.chess.operators
 
 import me.surge.common.chess.Board
 import me.surge.common.chess.Cell
+import me.surge.common.chess.Move
 import me.surge.common.chess.Side
-import me.surge.common.chess.operators.KingOperator.removeMarkedCells
+import me.surge.common.chess.operators.KingOperator.removeMarkedMoves
 
 object RookOperator : Operator {
 
-    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Cell> {
-        val cells = mutableListOf<Cell>()
+    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Move> {
+        val moves = mutableListOf<Move>()
 
         // up
         var y = cell.y - 1
@@ -21,7 +22,7 @@ object RookOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -42,7 +43,7 @@ object RookOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -63,7 +64,7 @@ object RookOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -84,7 +85,7 @@ object RookOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -95,10 +96,10 @@ object RookOperator : Operator {
         }
 
         if (removeMarked) {
-            removeMarkedCells(cell, cells, board, side)
+            removeMarkedMoves(moves, board, side)
         }
 
-        return cells
+        return moves
     }
 
 }

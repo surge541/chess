@@ -2,8 +2,9 @@ package me.surge.common.chess.operators
 
 import me.surge.common.chess.Board
 import me.surge.common.chess.Cell
+import me.surge.common.chess.Move
 import me.surge.common.chess.Side
-import me.surge.common.chess.operators.KingOperator.removeMarkedCells
+import me.surge.common.chess.operators.KingOperator.removeMarkedMoves
 
 object KnightOperator : Operator {
 
@@ -22,8 +23,8 @@ object KnightOperator : Operator {
         -1 to 2
     )
 
-    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Cell> {
-        val cells = mutableListOf<Cell>()
+    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Move> {
+        val moves = mutableListOf<Move>()
 
         offsets.forEach { (x, y) ->
             val selected = board.findNullable(cell.x + x, cell.y + y)
@@ -34,15 +35,15 @@ object KnightOperator : Operator {
                     return@forEach
                 }
 
-                cells.add(selected)
+                moves.add(Move(side, cell, selected))
             }
         }
 
         if (removeMarked) {
-            removeMarkedCells(cell, cells, board, side)
+            removeMarkedMoves(moves, board, side)
         }
 
-        return cells
+        return moves
     }
 
 }
