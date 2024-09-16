@@ -4,12 +4,12 @@ import me.surge.common.chess.Board
 import me.surge.common.chess.Cell
 import me.surge.common.chess.Move
 import me.surge.common.chess.Side
-import me.surge.common.chess.operators.KingOperator.removeMarkedCells
+import me.surge.common.chess.operators.KingOperator.removeMarkedMoves
 
 object QueenOperator : Operator {
 
-    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Cell> {
-        val cells = mutableListOf<Cell>()
+    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Move> {
+        val moves = mutableListOf<Move>()
 
         // up
         var y = cell.y - 1
@@ -22,7 +22,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -43,7 +43,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -64,7 +64,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -85,7 +85,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -107,7 +107,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -122,7 +122,7 @@ object QueenOperator : Operator {
         y = cell.y + 1
 
         // bottom left
-        while (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
+        while (x in 0..7 && y >= 0 && y <= 7) {
             val selected = board.find(x, y)
 
             // one of our pieces, we can't take
@@ -130,7 +130,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -145,7 +145,7 @@ object QueenOperator : Operator {
         y = cell.y + 1
 
         // bottom right
-        while (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
+        while (x in 0..7 && y >= 0 && y <= 7) {
             val selected = board.find(x, y)
 
             // one of our pieces, we can't take
@@ -153,7 +153,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -168,7 +168,7 @@ object QueenOperator : Operator {
         y = cell.y - 1
 
         // top right
-        while (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
+        while (x in 0..7 && y >= 0 && y <= 7) {
             val selected = board.find(x, y)
 
             // one of our pieces, we can't take
@@ -176,7 +176,7 @@ object QueenOperator : Operator {
                 break
             }
 
-            cells.add(selected)
+            moves.add(Move(side, cell, selected))
 
             // we've 'met' an opponent's piece, we *can* take it, but we can't progress further
             if (selected.piece.second != side && selected.piece.second != Side.EITHER) {
@@ -188,10 +188,10 @@ object QueenOperator : Operator {
         }
 
         if (removeMarked) {
-            removeMarkedCells(cell, cells, board, side)
+            removeMarkedMoves(moves, board, side)
         }
 
-        return cells
+        return moves
     }
 
 }

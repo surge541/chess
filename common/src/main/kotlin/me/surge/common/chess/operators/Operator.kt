@@ -2,13 +2,14 @@ package me.surge.common.chess.operators
 
 import me.surge.common.chess.Board
 import me.surge.common.chess.Cell
+import me.surge.common.chess.Move
 import me.surge.common.chess.Side
 
 import me.surge.common.chess.Piece.*
 
 interface Operator {
 
-    fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean = true): List<Cell>
+    fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean = true): List<Move>
 
     companion object {
 

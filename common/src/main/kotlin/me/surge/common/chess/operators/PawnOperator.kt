@@ -2,28 +2,28 @@ package me.surge.common.chess.operators
 
 import me.surge.common.chess.*
 import me.surge.common.chess.Side.Companion.opposite
-import me.surge.common.chess.operators.KingOperator.removeMarkedCells
+import me.surge.common.chess.operators.KingOperator.removeMarkedMoves
 
 object PawnOperator : Operator {
 
-    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Cell> {
+    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Move> {
         // if white, then we are going upwards, so decreasing Y, else we are increasing it
         val increment = if (cell.piece.second == Side.WHITE) -1 else 1
 
-        val cells = mutableListOf<Cell>()
+        val moves = mutableListOf<Move>()
 
         val offsetA = board.find(cell.x, cell.y + increment)
 
         if (offsetA.piece.first == Piece.EMPTY) {
             // add cell in front of pawn
-            cells.add(offsetA)
+            moves.add(Move(side, cell, offsetA.copy()))
 
             // starting pos
             if (!cell.moved) {
                 val offsetB = offsetA.offset(0, increment, board)
 
                 if (offsetB.piece.first == Piece.EMPTY) {
-                    cells.add(offsetB)
+                    moves.add(Move(side, cell, offsetB.copy()).tag(Move.Tag.DOUBLE_PAWN_MOVE))
                 }
             }
         }
@@ -32,7 +32,7 @@ object PawnOperator : Operator {
             val leftTake = board.find(cell.x - 1, cell.y + increment)
 
             if (leftTake.piece.first != Piece.EMPTY && leftTake.piece.second != cell.piece.second) {
-                cells.add(leftTake)
+                moves.add(Move(side, cell, leftTake.copy()))
             }
         }
 
@@ -40,26 +40,32 @@ object PawnOperator : Operator {
             val rightTake = board.find(cell.x + 1, cell.y + increment)
 
             if (rightTake.piece.first != Piece.EMPTY && rightTake.piece.second != cell.piece.second) {
-                cells.add(rightTake)
+                moves.add(Move(side, cell, rightTake.copy()))
             }
         }
 
         val left = board.findNullable(cell.x - 1, cell.y)
 
-        if (left != null && left.piece.first == Piece.PAWN && left.piece.second == side.opposite) {
-            println("Left Tag: ${left.tag}")
-            if (left.tag == Cell.Tag.DOUBLE_MOVE) {
-                cells.add(left.offset(0, if (left.piece.second == Side.WHITE) 1 else -1, board).also {
-                    it.claimedCell = left.x to left.y
-                })
+        if (left != null && left.piece.first == Piece.PAWN && left.piece.second == side.opposite && board.moves.isNotEmpty()) {
+            val lastMove = board.moves.last()
+
+            // did en-passant
+            if (lastMove.to == left && lastMove.tag == Move.Tag.DOUBLE_PAWN_MOVE) {
+                moves.add(
+                    Move(
+                        side,
+                        cell,
+                        left.offset(0, if (left.piece.second == Side.WHITE) 1 else -1, board)
+                    ).claimCell(left)
+                )
             }
         }
 
         if (removeMarked) {
-            removeMarkedCells(cell, cells, board, side)
+            removeMarkedMoves(moves, board, side)
         }
 
-        return cells
+        return moves
     }
 
 }

@@ -42,8 +42,8 @@ class MainScreen(previous: Screen?) : Screen(previous) {
 
         // user info
         run {
-            ctx.roundedRectangle(userInfoBounds, Settings.theme.cornerRadius, Settings.theme.primary)
-                .text(Main.account.username, userInfoBounds.x + Settings.theme.cornerRadius, userInfoBounds.y + Settings.theme.cornerRadius, Settings.theme.surface, "poppins", 16)
+            ctx.roundedRectangle(userInfoBounds, Settings.theme.cornerRadius, Settings.theme.surface)
+                .text(Main.account.username, userInfoBounds.x + Settings.theme.cornerRadius, userInfoBounds.y + Settings.theme.cornerRadius, Settings.theme.onSurface, "poppins", 16)
         }
     }
 

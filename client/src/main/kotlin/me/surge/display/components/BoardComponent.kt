@@ -16,7 +16,6 @@ import me.surge.util.Button
 import me.surge.util.Theme
 import me.surge.util.Theme.boardAlternate
 import me.surge.util.integrateAlpha
-import me.surge.util.lerp
 import org.lwjgl.nanovg.NanoVG.nvgGlobalAlpha
 import org.nvgu.NVGU
 import org.nvgu.util.Alignment
@@ -35,7 +34,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
     var selectedCell: Cell? = null
     var operator: Operator? = null
-    val selectableCells = mutableListOf<Cell>()
+    val selectableMoves = mutableListOf<Move>()
 
     val ended = Animation(500f, false, Easing.EXPO_IN_OUT)
     val moves = mutableListOf<RenderMove>()
@@ -46,7 +45,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
     override fun draw(ctx: NVGU, mouseX: Float, mouseY: Float) {
         if (Main.game != null && Main.game!!.turn != Main.side) {
-            selectableCells.clear()
+            selectableMoves.clear()
         }
 
         // draw board
@@ -136,7 +135,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
     @Listener
     fun onGameUpdate(packet: GameUpdateRequestPacket.GameUpdateRequestResponsePacket) {
-        packet.game!!.board.cells.forEach { remoteCell ->
+        /*packet.game!!.board.cells.forEach { remoteCell ->
             // update local board
             board.cells.first { boardCell ->
                 boardCell.x == remoteCell.x && boardCell.y == remoteCell.y
@@ -151,7 +150,9 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
                 it.piece = remoteCell.piece
                 it.moved = remoteCell.moved
             }*/
-        }
+        }*/
+
+        board.sync(packet.game!!.board)
 
         packet.game!!.board.moves.filter { move -> !moves.any { renderMove -> renderMove.move == move } }.forEach { move ->
             moves.add(RenderMove(move, cells.first { it.cell == move.from }, cells.first { it.cell == move.to }))
@@ -213,27 +214,30 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
         }
 
         fun drawOverlay(ctx: NVGU) {
-            if (cell in selectableCells) {
+            if (selectableMoves.any { it.to == cell }) {
                 ctx.circle(x + dimension / 2f, y + dimension / 2f, ((dimension / 2f) - 10f) + (2.5f * hovered.animationFactor).toFloat(), Settings.theme.boardHighlight)
             }
         }
 
         override fun click(mouseX: Float, mouseY: Float, button: Button): Boolean {
             if (hovered(mouseX, mouseY) && Main.game != null && Main.side != null && Main.game!!.turn == Main.side) {
-                if (this.cell in selectableCells && selectedCell != null) {
-                    val move = Move(Main.side!!, selectedCell!!, this.cell)
+                if (selectableMoves.any { it.to == cell } && selectedCell != null) {
+                    val move = selectableMoves.first { it.to == cell }
                     Main.connection!!.post(ClientGameUpdate(Main.game!!.id, move))
                     return true
                 }
 
-                selectableCells.clear()
+                selectableMoves.clear()
 
                 if (isCellOurs(cell)) {
                     operator = Operator.getOperator(this.cell, Main.side!!)
 
                     if (operator != null) {
                         selectedCell = this.cell
-                        selectableCells.addAll(operator!!.collectTiles(this.cell, board, Main.side!!))
+                        selectableMoves.addAll(operator!!.collectTiles(this.cell, board, Main.side!!))
+
+                        println(selectableMoves)
+                        println(board.moves)
                     }
                 } else {
                     operator = null

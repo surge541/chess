@@ -23,8 +23,8 @@ object KingOperator : Operator {
         0 to 1,
     )
 
-    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Cell> {
-        val cells = CopyOnWriteArrayList<Cell>()
+    override fun collectTiles(cell: Cell, board: Board, side: Side, removeMarked: Boolean): List<Move> {
+        val moves = CopyOnWriteArrayList<Move>()
 
         offsets.forEach { offset ->
             val selected = board.findNullable(cell.x + offset.first, cell.y + offset.second)
@@ -35,21 +35,21 @@ object KingOperator : Operator {
                     return@forEach
                 }
 
-                cells.add(selected)
+                moves.add(Move(side, cell, selected))
             }
         }
 
-        cells.addAll(getCastlingCells(cell, board).first)
+        moves.addAll(getCastlingMoves(cell, board).first)
 
         if (removeMarked) {
-            removeMarkedCells(cell, cells, board, side)
+            removeMarkedMoves(moves, board, side)
         }
 
-        return cells
+        return moves
     }
 
-    fun getCastlingCells(cell: Cell, board: Board): Pair<List<Cell>, Pair<Cell?, Cell?>> {
-        val cells = mutableListOf<Cell>()
+    fun getCastlingMoves(cell: Cell, board: Board): Pair<List<Move>, Pair<Cell?, Cell?>> {
+        val moves = mutableListOf<Move>()
 
         var kingsideRook: Cell? = null
         var queensideRook: Cell? = null
@@ -71,7 +71,7 @@ object KingOperator : Operator {
                 }
 
                 if (kingSide) {
-                    cells.add(board.find(cell.x + 2, cell.y))
+                    moves.add(Move(cell.piece.second, cell, board.find(cell.x + 2, cell.y)))
                 }
             }
 
@@ -88,29 +88,28 @@ object KingOperator : Operator {
                 }
 
                 if (queenSide) {
-                    cells.add(board.find(cell.x - 3, cell.y))
+                    moves.add(Move(cell.piece.second, cell, board.find(cell.x - 3, cell.y)))
                 }
             }
         }
 
-        return cells to (kingsideRook to queensideRook)
+        return moves to (kingsideRook to queensideRook)
     }
 
-    fun removeMarkedCells(origin: Cell, cells: MutableList<Cell>, board: Board, side: Side) {
-        val buffer = mutableListOf<Cell>()
+    fun removeMarkedMoves(moves: MutableList<Move>, board: Board, side: Side) {
+        val buffer = mutableListOf<Move>()
 
-        cells.forEach {
-            val move = Move(side, origin, it)
+        moves.forEach {
             val dummyBoard = board.makeDummyClone()
 
-            dummyBoard.set(move.copy())
+            dummyBoard.set(it.copy())
 
             if (inCheck(dummyBoard.findKing(side), dummyBoard, side)) {
                 buffer.add(it)
             }
         }
 
-        cells.removeIf { cell -> buffer.any { it.x == cell.x && it.y == cell.y } }
+        moves.removeIf { move -> buffer.any { it.to.x == move.to.x && it.to.y == move.to.y } }
     }
 
     fun inCheck(cell: Cell, board: Board, side: Side): Boolean {
@@ -201,7 +200,7 @@ object KingOperator : Operator {
                 return@forEach
             }
 
-            if (operator != null && operator.collectTiles(marked, board, marked.piece.second, removeMarked = false).contains(cell)) {
+            if (operator != null && operator.collectTiles(marked, board, marked.piece.second, removeMarked = false).any { move -> move.to == cell }) {
                 return true
             }
         }

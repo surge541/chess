@@ -6,9 +6,13 @@ import me.surge.client.Connection
 import me.surge.client.Settings
 import me.surge.common.auth.Account
 import me.surge.common.background
+import me.surge.common.chess.Board
 import me.surge.common.chess.ChessGame
 import me.surge.common.chess.ChessGame.EndReason
+import me.surge.common.chess.Move
 import me.surge.common.chess.Side
+import me.surge.common.chess.operators.KingOperator
+import me.surge.common.chess.operators.PawnOperator
 import me.surge.common.log.Logger
 import me.surge.common.packet.GameUpdateRequestPacket
 import me.surge.common.util.Timer
@@ -58,11 +62,19 @@ object Main {
     val backgroundThreads = mutableListOf<Thread>()
 
     @JvmStatic fun main(args: Array<String>) {
-        /*val board = Board()
+        val board = Board()
         println(board)
-        println(KingOperator.collectTiles(board.find(4, 7), board, Side.WHITE).map { "$it\n" })
 
-        return*/
+        board.set(Move(Side.WHITE, board.find(2, 3), board.find(2, 2)))
+        println(PawnOperator.collectTiles(board.find(0, 1), board, Side.BLACK))
+        board.set(Move(Side.BLACK, board.find(0, 1), board.find(0, 3)).tag(Move.Tag.DOUBLE_PAWN_MOVE))
+
+        println(board)
+
+        println(board.moves)
+        println(PawnOperator.collectTiles(board.find(1, 3), board, Side.WHITE))
+
+        //return
 
         Settings.load()
 
