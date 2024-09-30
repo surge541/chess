@@ -29,7 +29,7 @@ class RegisterPacket(json: JSONObject) : Packet("register", json) {
 
     enum class RegistrationStatus {
         SUCCESS,
-        ACCOUNT_ALREADY_EXISTS,
+        EMAIL_ALREADY_EXISTS,
         USERNAME_ALREADY_EXISTS
     }
 

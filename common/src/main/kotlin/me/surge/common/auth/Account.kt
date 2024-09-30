@@ -1,23 +1,26 @@
 package me.surge.common.auth
 
+import me.surge.common.chess.ChessGame
 import me.surge.common.packet.IEmbeddable
 import org.json.JSONObject
 
 data class Account(val id: Int, val email: String, val username: String, val password: String) {
 
-    var gameId = -1
+    var online = false
+    var game: ChessGame? = null
 
     val public: PublicAccountDetails
-        get() = PublicAccountDetails(id, username)
+        get() = PublicAccountDetails(id, username, online, game)
 
     companion object : IEmbeddable<Account> {
 
-        override fun embed(obj: Account) = JSONObject()
+        override fun embed(obj: Account): JSONObject = JSONObject()
             .put("id", obj.id)
             .put("email", obj.email)
             .put("username", obj.username)
             .put("password", obj.password)
-            .put("gameId", obj.gameId)
+            .put("online", obj.online)
+            .put("game", if (obj.game == null) null else ChessGame.embed(obj.game!!))
 
         override fun extract(key: String?, json: JSONObject): Account? {
             val obj = runCatching { json.getJSONObject(key) }
@@ -29,9 +32,13 @@ data class Account(val id: Int, val email: String, val username: String, val pas
             val email = obj.getString("email")
             val username = obj.getString("username")
             val password = obj.getString("password")
-            val gameId = obj.getInt("gameId")
+            val online = obj.getBoolean("online")
+            val game = ChessGame.extract("game", json)
 
-            return Account(id, email, username, password).also { it.gameId = gameId }
+            return Account(id, email, username, password).also {
+                it.online = online
+                it.game = game
+            }
         }
 
     }

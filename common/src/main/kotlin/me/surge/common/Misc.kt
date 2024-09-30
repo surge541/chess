@@ -24,8 +24,3 @@ operator fun String.times(amount: Int): String {
 
     return result
 }
-
-fun Thread.background(list: MutableList<Thread>): Thread {
-    list.add(this)
-    return this
-}

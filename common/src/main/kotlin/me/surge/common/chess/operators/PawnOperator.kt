@@ -61,6 +61,23 @@ object PawnOperator : Operator {
             }
         }
 
+        val right = board.findNullable(cell.x + 1, cell.y)
+
+        if (right != null && right.piece.first == Piece.PAWN && right.piece.second == side.opposite && board.moves.isNotEmpty()) {
+            val lastMove = board.moves.last()
+
+            // did en-passant
+            if (lastMove.to == right && lastMove.tag == Move.Tag.DOUBLE_PAWN_MOVE) {
+                moves.add(
+                    Move(
+                        side,
+                        cell,
+                        right.offset(0, if (right.piece.second == Side.WHITE) 1 else -1, board)
+                    ).claimCell(right)
+                )
+            }
+        }
+
         if (removeMarked) {
             removeMarkedMoves(moves, board, side)
         }

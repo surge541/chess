@@ -126,7 +126,7 @@ class Board {
     companion object : IEmbeddable<Board> {
 
         val initialCells = arrayListOf(
-            /*Cell(0, 0, ROOK to BLACK),
+            Cell(0, 0, ROOK to BLACK),
             Cell(1, 0, KNIGHT to BLACK),
             Cell(2, 0, BISHOP to BLACK),
             Cell(3, 0, QUEEN to BLACK),
@@ -142,32 +142,7 @@ class Board {
             Cell(4, 7, KING to WHITE),
             Cell(5, 7, BISHOP to WHITE),
             Cell(6, 7, KNIGHT to WHITE),
-            Cell(7, 7, ROOK to WHITE)*/
-
-            // Rook Backrank Checkmate
-            /*Cell(7, 7, KING to WHITE),
-            Cell(0, 0, KING to BLACK),
-            Cell(3, 1, ROOK to WHITE),
-            Cell(4, 2, ROOK to WHITE),*/
-
-            // Kings
-            /*Cell(2, 4, KING to WHITE),
-            Cell(4, 4, KING to BLACK),*/
-
-            // castling
-            /*Cell(0, 0, ROOK to BLACK),
-            Cell(4, 0, KING to BLACK),
-            Cell(7, 0, ROOK to BLACK),
-
-            Cell(0, 7, ROOK to WHITE),
-            Cell(4, 7, KING to WHITE),
-            Cell(7, 7, ROOK to WHITE)*/
-
-            Cell(0, 0, KING to BLACK),
-            Cell(0, 7, KING to WHITE),
-            Cell(0, 1, PAWN to BLACK),
-            Cell(1, 3, PAWN to WHITE),
-            Cell(2, 3, PAWN to WHITE),
+            Cell(7, 7, ROOK to WHITE)
         ).also {
             fun pawns(y: Int, side: Side) {
                 for (x in 0 until 8) {
@@ -175,8 +150,8 @@ class Board {
                 }
             }
 
-            //pawns(1, BLACK)
-            //pawns(6, WHITE)
+            pawns(1, BLACK)
+            pawns(6, WHITE)
         }
 
         override fun embed(obj: Board) = JSONObject().also {

@@ -1,28 +1,25 @@
 package me.surge.server
 
 import me.surge.Main
-import me.surge.Main.backgroundThreads
 import me.surge.amalia.handler.Listener
 import me.surge.auth.AuthorisationHandler
 import me.surge.auth.UserConnection
-import me.surge.common.background
 import me.surge.common.log.Logger
+import me.surge.common.managers.ThreadManager
+import me.surge.common.managers.ThreadManager.submit
 import me.surge.common.packet.LoginPacket
 import me.surge.common.packet.RegisterPacket
 import me.surge.games.GameManager
 import java.net.ServerSocket
 import kotlin.concurrent.thread
 
-class Server(val port: Int) {
+class Server(private val port: Int) {
 
     val logger = Logger("SERVER $port")
-    val serverSocket = ServerSocket(port)
-
-    val connections = mutableListOf<UserConnection>()
+    private val serverSocket = ServerSocket(port)
 
     init {
         Main.bus.subscribe(this)
-
         Main.bus.subscribe(GameManager)
     }
 
@@ -34,10 +31,12 @@ class Server(val port: Int) {
                 val client = serverSocket.accept()
                 logger.info("Accepted client from address ${client.inetAddress.hostAddress}")
 
-                thread {
+                submit("thread-${client.inetAddress.hostAddress}") {
                     UserConnection(client).start()
-                }.background(backgroundThreads)
+                }
             }
+
+            ThreadManager.destroy()
         }
 
         return this

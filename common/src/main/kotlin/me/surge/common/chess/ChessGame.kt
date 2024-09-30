@@ -2,6 +2,7 @@ package me.surge.common.chess
 
 import me.surge.common.auth.PublicAccountDetails
 import me.surge.common.chess.operators.KingOperator
+import me.surge.common.chess.operators.Operator
 import me.surge.common.packet.IEmbeddable
 import org.json.JSONObject
 import java.util.concurrent.CopyOnWriteArrayList
@@ -15,6 +16,12 @@ class ChessGame(val id: Int, val white: PublicAccountDetails, val black: PublicA
     var winner: Side? = null
     var endReason: EndReason? = null
 
+    /**
+     * Updates this game with the given move, and processes it,
+     * as well as calculating endings
+     *
+     * @param move
+     */
     fun update(move: Move) {
         if (move.side != turn) {
             return
@@ -29,26 +36,53 @@ class ChessGame(val id: Int, val white: PublicAccountDetails, val black: PublicA
             winner = checkmateStatus.second
             playing = false
             endReason = EndReason.CHECKMATE
+
+            println(this)
         }
     }
 
     /**
      * Checks if either side has been checkmated by the other
+     *
      * @return whether a checkmate has occurred, and the side which wins
-     * if neither has won, it should return <code>false to Side.EITHER</code>
+     * if neither has won, it should return false to [Side.EITHER]
      */
-    private fun checkmated(): Pair<Boolean, Side> {
+    fun checkmated(): Pair<Boolean, Side> {
         val white = board.findKing(Side.WHITE)
         val black = board.findKing(Side.BLACK)
 
         if (KingOperator.inCheck(white, board, Side.WHITE)) {
-            if (KingOperator.collectTiles(white, board, Side.WHITE).isEmpty()) {
+            var mated = true
+
+            for (cell in board.cells) {
+                if (cell.piece.first != Piece.EMPTY && cell.piece.second == Side.WHITE) {
+                    val operator = Operator.getOperator(cell, Side.WHITE)!!
+
+                    if (operator.collectTiles(cell, board, Side.WHITE).isNotEmpty()) {
+                        mated = false
+                    }
+                }
+            }
+
+            if (mated) {
                 return true to Side.BLACK
             }
         }
 
         if (KingOperator.inCheck(black, board, Side.BLACK)) {
-            if (KingOperator.collectTiles(black, board, Side.BLACK).isEmpty()) {
+            var mated = true
+
+            for (cell in board.cells) {
+                if (cell.piece.first != Piece.EMPTY && cell.piece.second == Side.BLACK) {
+                    val operator = Operator.getOperator(cell, Side.BLACK)!!
+
+                    if (operator.collectTiles(cell, board, Side.BLACK).isNotEmpty()) {
+                        mated = false
+                    }
+                }
+            }
+
+            if (mated) {
                 return true to Side.WHITE
             }
         }

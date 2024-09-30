@@ -135,23 +135,6 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
     @Listener
     fun onGameUpdate(packet: GameUpdateRequestPacket.GameUpdateRequestResponsePacket) {
-        /*packet.game!!.board.cells.forEach { remoteCell ->
-            // update local board
-            board.cells.first { boardCell ->
-                boardCell.x == remoteCell.x && boardCell.y == remoteCell.y
-            }.also {
-                it.piece = remoteCell.piece
-                it.moved = remoteCell.moved
-            }
-
-            /*cells.first { renderCell ->
-                renderCell.cell.x == remoteCell.x && renderCell.cell.y == remoteCell.y
-            }.cell.also {
-                it.piece = remoteCell.piece
-                it.moved = remoteCell.moved
-            }*/
-        }*/
-
         board.sync(packet.game!!.board)
 
         packet.game!!.board.moves.filter { move -> !moves.any { renderMove -> renderMove.move == move } }.forEach { move ->
@@ -235,9 +218,6 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
                     if (operator != null) {
                         selectedCell = this.cell
                         selectableMoves.addAll(operator!!.collectTiles(this.cell, board, Main.side!!))
-
-                        println(selectableMoves)
-                        println(board.moves)
                     }
                 } else {
                     operator = null

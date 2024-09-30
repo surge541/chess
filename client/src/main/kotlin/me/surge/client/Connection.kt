@@ -1,19 +1,18 @@
 package me.surge.client
 
 import me.surge.Main
-import me.surge.common.background
+import me.surge.common.managers.ThreadManager.submit
 import me.surge.common.packet.Packet
 import java.io.OutputStream
 import java.net.Socket
 import java.nio.charset.Charset
 import java.util.Scanner
-import kotlin.concurrent.thread
 
 class Connection(val address: String, val port: Int) {
 
     var connected = true
 
-    lateinit var socket: Socket
+    private lateinit var socket: Socket
 
     lateinit var reader: Scanner
     lateinit var writer: OutputStream
@@ -34,7 +33,12 @@ class Connection(val address: String, val port: Int) {
         reader = Scanner(socket.getInputStream())
         writer = socket.getOutputStream()
 
-        thread { read() }.background(Main.backgroundThreads)
+        submit("$address:$port") {
+            while (connected) {
+                val line = reader.nextLine()
+                Main.bus.post(Packet.decode(line))
+            }
+        }
     }
 
     fun post(packet: Packet) {
@@ -42,13 +46,6 @@ class Connection(val address: String, val port: Int) {
 
         writer.write(data.toByteArray(Charset.defaultCharset()))
         writer.flush()
-    }
-
-    private fun read() {
-        while (connected) {
-            val line = reader.nextLine()
-            Main.bus.post(Packet.decode(line))
-        }
     }
 
 }

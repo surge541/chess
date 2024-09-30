@@ -5,7 +5,7 @@ import me.surge.amalia.handler.Listener
 import me.surge.client.Connection
 import me.surge.client.Settings
 import me.surge.common.auth.Account
-import me.surge.common.background
+import me.surge.common.auth.PublicAccountDetails
 import me.surge.common.chess.Board
 import me.surge.common.chess.ChessGame
 import me.surge.common.chess.ChessGame.EndReason
@@ -14,6 +14,8 @@ import me.surge.common.chess.Side
 import me.surge.common.chess.operators.KingOperator
 import me.surge.common.chess.operators.PawnOperator
 import me.surge.common.log.Logger
+import me.surge.common.managers.ThreadManager
+import me.surge.common.managers.ThreadManager.loopingThread
 import me.surge.common.packet.GameUpdateRequestPacket
 import me.surge.common.util.Timer
 import me.surge.display.Window
@@ -58,37 +60,18 @@ object Main {
     var lastWinner: Side? = null
     var lastEndReason: EndReason? = null
 
-    private var open = true
-    val backgroundThreads = mutableListOf<Thread>()
-
     @JvmStatic fun main(args: Array<String>) {
-        val board = Board()
-        println(board)
-
-        board.set(Move(Side.WHITE, board.find(2, 3), board.find(2, 2)))
-        println(PawnOperator.collectTiles(board.find(0, 1), board, Side.BLACK))
-        board.set(Move(Side.BLACK, board.find(0, 1), board.find(0, 3)).tag(Move.Tag.DOUBLE_PAWN_MOVE))
-
-        println(board)
-
-        println(board.moves)
-        println(PawnOperator.collectTiles(board.find(1, 3), board, Side.WHITE))
-
-        //return
-
         Settings.load()
 
-        gameUpdateThread = thread {
-            while (open) {
-                try {
-                    if (gameUpdateTimer.passed(500) && game != null) {
-                        connection?.post(GameUpdateRequestPacket(game!!.id))
-                    }
-                } catch (exception: Exception) {
-                    exception.printStackTrace()
+        gameUpdateThread = loopingThread("game-update") {
+            try {
+                if (gameUpdateTimer.passed(500) && game != null) {
+                    connection?.post(GameUpdateRequestPacket(game!!.id))
                 }
+            } catch (exception: Exception) {
+                exception.printStackTrace()
             }
-        }.background(backgroundThreads)
+        }
 
         window.run({
             nvgu.create()
@@ -112,12 +95,8 @@ object Main {
                 screen.beginDraw(nvgu, window.mouseX, window.mouseY)
             }
         }.terminate {
-            open = false
             nvgu.destroy()
-
-            backgroundThreads.forEach {
-                it.interrupt()
-            }
+            ThreadManager.destroy()
         }
 
         Settings.save()

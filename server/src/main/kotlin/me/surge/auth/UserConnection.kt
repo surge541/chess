@@ -9,10 +9,7 @@ import java.util.Scanner
 
 class UserConnection(val socket: Socket) {
 
-    lateinit var account: Account
-
     val reader = Scanner(socket.getInputStream())
-    val writer = socket.getOutputStream()
     var running = true
 
     fun start() {
@@ -33,17 +30,4 @@ class UserConnection(val socket: Socket) {
             }
         }
     }
-
-    fun post(packet: Packet) {
-        val data = (packet.write() + '\n')
-
-        writer.write(data.toByteArray(Charset.defaultCharset()))
-        writer.flush()
-    }
-
-    fun close() {
-        running = false
-        socket.close()
-    }
-
 }

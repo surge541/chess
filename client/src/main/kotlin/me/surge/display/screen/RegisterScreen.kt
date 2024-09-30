@@ -8,7 +8,6 @@ import me.surge.display.components.ButtonComponent
 import me.surge.display.components.TextComponent
 import me.surge.util.Button
 import me.surge.util.InputLayers
-import me.surge.util.Theme
 import org.nvgu.NVGU
 import org.nvgu.util.Alignment
 import java.awt.Color
@@ -60,7 +59,7 @@ class RegisterScreen(previous: Screen?) : Screen(previous) {
     @Listener
     fun registrationResponse(packet: RegisterPacket.RegistrationResponsePacket) {
         when (packet.response) {
-            RegisterPacket.RegistrationStatus.ACCOUNT_ALREADY_EXISTS -> {
+            RegisterPacket.RegistrationStatus.EMAIL_ALREADY_EXISTS -> {
                 message = "Account with email ${email.input} already exists"
             }
 

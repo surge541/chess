@@ -24,14 +24,29 @@ class ServerScreen : Screen(null) {
     private val connect = register(object : ButtonComponent("Connect", 0f, 0f, 300f, 40f) {
 
         override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
-            Main.connection = Connection(address.input, port.input.toInt()).also {
+            /*Main.connection = Connection(address.input, port.input.toInt()).also {
                 it.begin()
+
+                println(it.connected)
 
                 if (it.connected) {
                     Main.screen = LoginScreen(this@ServerScreen)
                 } else {
                     message = "Failed to connect to ${address.input}:${port.input}"
+                    println(message)
                 }
+            }*/
+
+            val connection = Connection(address.input, port.input.toInt())
+
+            connection.begin()
+
+            if (connection.connected) {
+                Main.screen = LoginScreen(this@ServerScreen)
+                Main.connection = connection
+            } else {
+                message = "Failed to connect to ${address.input}:${port.input}"
+                Main.connection = null
             }
         }
 
@@ -45,6 +60,8 @@ class ServerScreen : Screen(null) {
 
     override fun draw(ctx: NVGU, mouseX: Float, mouseY: Float) {
         defaultBackground(ctx)
+
+        //println(message)
 
         ctx.text("Join Server", Main.window.width / 2f, Main.window.height / 2f - 150f, Settings.theme.onBackground, "poppins", 30, Alignment.CENTER_MIDDLE)
             .text(message, Main.window.width / 2f, Main.window.height - 30f, Color.RED, "poppins", 16, Alignment.CENTER_MIDDLE)
