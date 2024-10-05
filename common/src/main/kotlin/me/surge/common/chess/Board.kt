@@ -63,6 +63,10 @@ class Board {
             claimed.inherit(Cell(move.claimCell!!.x, move.claimCell!!.y, EMPTY to EITHER))
         }
 
+        if (move.piece != null) {
+            resultant.inherit(Cell(move.to.x, move.to.y, move.piece!! to move.side))
+        }
+
         moves.add(move)
     }
 

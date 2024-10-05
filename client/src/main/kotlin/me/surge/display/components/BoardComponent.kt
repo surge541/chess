@@ -30,14 +30,14 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
             resetCells()
         }
 
-    val cells = mutableListOf<RenderCell>()
+    private val cells = mutableListOf<RenderCell>()
 
     var selectedCell: Cell? = null
     var operator: Operator? = null
     val selectableMoves = mutableListOf<Move>()
 
-    val ended = Animation(500f, false, Easing.EXPO_IN_OUT)
-    val moves = mutableListOf<RenderMove>()
+    private val ended = Animation(500f, false, Easing.EXPO_IN_OUT)
+    private var removePrioritised = false
 
     init {
         resetCells()
@@ -70,6 +70,10 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
                 renderCell.relativeX = relativeX
                 renderCell.relativeY = relativeY
                 renderCell.dimension = cellDimensions
+
+                if (removePrioritised) {
+                    renderCell.pawnPromoter = null
+                }
 
                 renderCell.draw(ctx, mouseX, mouseY)
                 renderCell.drawPiece(ctx, renderCell.x, renderCell.y)
@@ -106,6 +110,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
                         .text("${Main.lastWinner!!.name.title} Wins", bounds.centerX.toFloat(), bounds.centerY.toFloat(), Settings.theme.onSurface, "poppins", 32, Alignment.CENTER_BOTTOM)
                         .text("by ${Main.lastEndReason!!.name.lowercase()}", bounds.centerX.toFloat(), bounds.centerY.toFloat(), Settings.theme.onSurface, "poppins", 16, Alignment.CENTER_TOP)
                         .restore()
+
                 } else {
                     ended.state = false
                 }
@@ -136,10 +141,6 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
     @Listener
     fun onGameUpdate(packet: GameUpdateRequestPacket.GameUpdateRequestResponsePacket) {
         board.sync(packet.game!!.board)
-
-        packet.game!!.board.moves.filter { move -> !moves.any { renderMove -> renderMove.move == move } }.forEach { move ->
-            moves.add(RenderMove(move, cells.first { it.cell == move.from }, cells.first { it.cell == move.to }))
-        }
     }
 
     fun resetCells() {
@@ -162,10 +163,12 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
     inner class RenderCell(x: Float, y: Float, var dimension: Float, val cell: Cell, val colour: Color) : Component(x, y, dimension, dimension) {
 
-        val hovered = Animation(400f, false, Theme.easing)
+        private val hovered = Animation(400f, false, Theme.easing)
 
         var relativeX = 0
         var relativeY = 0
+
+        var pawnPromoter: PawnPromoter? = null
 
         override fun draw(ctx: NVGU, mouseX: Float, mouseY: Float) {
             hovered.state = hovered(mouseX, mouseY)
@@ -179,6 +182,8 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
             if (relativeY == 1) {
                 ctx.text(cell.x.chessColumn, x + width - 2f, y + height - 2f, colour.boardAlternate, "poppins", 12, Alignment.RIGHT_BOTTOM)
             }
+
+            pawnPromoter?.draw(ctx, mouseX, mouseY)
         }
 
         fun drawPiece(ctx: NVGU, x: Float, y: Float) {
@@ -203,9 +208,21 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
         }
 
         override fun click(mouseX: Float, mouseY: Float, button: Button): Boolean {
+            if (pawnPromoter != null && Main.screen.prioritised == pawnPromoter) {
+                pawnPromoter = null
+                Main.screen.prioritised = null
+            }
+
             if (hovered(mouseX, mouseY) && Main.game != null && Main.side != null && Main.game!!.turn == Main.side) {
                 if (selectableMoves.any { it.to == cell } && selectedCell != null) {
                     val move = selectableMoves.first { it.to == cell }
+
+                    if (move.tag == Move.Tag.PAWN_PROMOTION) {
+                        pawnPromoter = PawnPromoter(this, move, mouseX, mouseY)
+                        Main.screen.prioritised = pawnPromoter
+                        return true
+                    }
+
                     Main.connection!!.post(ClientGameUpdate(Main.game!!.id, move))
                     return true
                 }
@@ -231,9 +248,60 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
     }
 
-    inner class RenderMove(val move: Move, val from: RenderCell, val to: RenderCell) {
+    inner class PawnPromoter(private val cell: RenderCell, val move: Move, x: Float, y: Float) : Component(x, y, 228f, 60f) {
 
-        val animation = Animation(1000f, false, Easing.LINEAR)
+        private val buttons = listOf(
+            object : IconButtonComponent("${Settings.theme.id}.queen.${move.from.piece.second.name.lowercase()}", x, y, 52f, 52f) {
+                override fun pressed(mouseX: Float, mouseY: Float, button: Button) = press(Piece.QUEEN)
+            },
+
+            object : IconButtonComponent("${Settings.theme.id}.bishop.${move.from.piece.second.name.lowercase()}", x, y, 52f, 52f) {
+                override fun pressed(mouseX: Float, mouseY: Float, button: Button) = press(Piece.BISHOP)
+            },
+
+            object : IconButtonComponent("${Settings.theme.id}.knight.${move.from.piece.second.name.lowercase()}", x, y, 52f, 52f) {
+                override fun pressed(mouseX: Float, mouseY: Float, button: Button) = press(Piece.KNIGHT)
+            },
+
+            object : IconButtonComponent("${Settings.theme.id}.rook.${move.from.piece.second.name.lowercase()}", x, y, 52f, 52f) {
+                override fun pressed(mouseX: Float, mouseY: Float, button: Button) = press(Piece.ROOK)
+            }
+        )
+
+        override fun update(mouseX: Float, mouseY: Float) {
+            var buttonX = x + 4f
+
+            buttons.forEach {
+                it.setBounds(buttonX, y + 4f)
+                it.update(mouseX, mouseY)
+
+                buttonX += 56f
+            }
+        }
+
+        override fun draw(ctx: NVGU, mouseX: Float, mouseY: Float) {
+            ctx.roundedRectangle(x, y, width, height, Settings.theme.cornerRadius, Settings.theme.surface)
+
+            buttons.forEach {
+                it.draw(ctx, mouseX, mouseY)
+            }
+        }
+
+        override fun click(mouseX: Float, mouseY: Float, button: Button): Boolean {
+            buttons.forEach {
+                if (it.click(mouseX, mouseY, button)) {
+                    return true
+                }
+            }
+
+            return false
+        }
+
+        private fun press(piece: Piece) {
+            Main.connection!!.post(ClientGameUpdate(Main.game!!.id, move.piece(piece)))
+            Main.screen.prioritised = null
+            cell.pawnPromoter = null
+        }
 
     }
 

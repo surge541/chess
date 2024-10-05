@@ -4,7 +4,6 @@ import me.surge.Main
 import me.surge.client.Settings
 import me.surge.display.components.Component
 import me.surge.util.Button
-import me.surge.util.Theme
 import me.surge.util.subscribeThis
 import me.surge.util.unsubscribeThis
 import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -25,7 +24,7 @@ abstract class Screen(val previous: Screen?) {
     open fun char(char: Char) = false
     open fun key(code: Int) = false
 
-    fun beginDraw(ctx: NVGU, mouseX: Float, mouseY: Float) {
+    fun acceptDraw(ctx: NVGU, mouseX: Float, mouseY: Float) {
         draw(ctx, mouseX, mouseY)
 
         components.filter { it != prioritised }.forEach { it.update(mouseX, mouseY) }

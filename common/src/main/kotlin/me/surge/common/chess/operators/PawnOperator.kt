@@ -82,6 +82,24 @@ object PawnOperator : Operator {
             removeMarkedMoves(moves, board, side)
         }
 
+        moves.forEach {
+            when (it.from.piece.second) {
+                Side.WHITE -> {
+                    if (it.to.y == 0) {
+                        it.tag(Move.Tag.PAWN_PROMOTION)
+                    }
+                }
+
+                Side.BLACK -> {
+                    if (it.to.y == 7) {
+                        it.tag(Move.Tag.PAWN_PROMOTION)
+                    }
+                }
+
+                else -> {}
+            }
+        }
+
         return moves
     }
 

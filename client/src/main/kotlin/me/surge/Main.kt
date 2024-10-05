@@ -5,14 +5,9 @@ import me.surge.amalia.handler.Listener
 import me.surge.client.Connection
 import me.surge.client.Settings
 import me.surge.common.auth.Account
-import me.surge.common.auth.PublicAccountDetails
-import me.surge.common.chess.Board
 import me.surge.common.chess.ChessGame
 import me.surge.common.chess.ChessGame.EndReason
-import me.surge.common.chess.Move
 import me.surge.common.chess.Side
-import me.surge.common.chess.operators.KingOperator
-import me.surge.common.chess.operators.PawnOperator
 import me.surge.common.log.Logger
 import me.surge.common.managers.ThreadManager
 import me.surge.common.managers.ThreadManager.loopingThread
@@ -29,7 +24,6 @@ import me.surge.util.subscribeThis
 import me.surge.util.unsubscribeThis
 import org.nvgu.NVGU
 import org.nvgu.util.Alignment
-import kotlin.concurrent.thread
 
 object Main {
 
@@ -92,7 +86,7 @@ object Main {
 
             nvgu.frame(window.width, window.height) {
                 screen.update(window.mouseX, window.mouseY)
-                screen.beginDraw(nvgu, window.mouseX, window.mouseY)
+                screen.acceptDraw(nvgu, window.mouseX, window.mouseY)
             }
         }.terminate {
             nvgu.destroy()

@@ -36,8 +36,6 @@ class ChessGame(val id: Int, val white: PublicAccountDetails, val black: PublicA
             winner = checkmateStatus.second
             playing = false
             endReason = EndReason.CHECKMATE
-
-            println(this)
         }
     }
 

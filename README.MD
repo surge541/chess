@@ -4,12 +4,12 @@ NEA project, or, at least, a base to build around.
 
 ### Planned and Completed features
 Game:
-- [ ] Piece Moving
+- [x] Piece Moving
   - [x] Basic Piece Moving
   - [x] Double Pawn Moves
   - [x] En Passant
   - [x] Castling
-  - [ ] Pawn Promotion
+  - [x] Pawn Promotion
 
   <br />
 - [ ] Endings
