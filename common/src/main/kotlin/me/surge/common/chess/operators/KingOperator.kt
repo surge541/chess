@@ -49,6 +49,10 @@ object KingOperator : Operator {
     }
 
     fun getCastlingMoves(cell: Cell, board: Board): Pair<List<Move>, Pair<Cell?, Cell?>> {
+        if (inCheck(cell, board, cell.piece.second)) {
+            return listOf<Move>() to (null to null)
+        }
+
         val moves = mutableListOf<Move>()
 
         var kingsideRook: Cell? = null
