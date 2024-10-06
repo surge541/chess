@@ -1,4 +1,3 @@
-import me.surge.Main.game
 import me.surge.common.auth.PublicAccountDetails
 import me.surge.common.chess.Board
 import me.surge.common.chess.ChessGame
@@ -7,7 +6,7 @@ import me.surge.common.chess.Side
 import me.surge.common.chess.operators.PawnOperator
 
 fun main(args: Array<String>) {
-    val board = Board()
+    /*val board = Board()
 
     val game = ChessGame(
         0,
@@ -27,5 +26,5 @@ fun main(args: Array<String>) {
 
     println(board)
 
-    println(game.checkmated())
+    println(game.checkmated())*/
 }
