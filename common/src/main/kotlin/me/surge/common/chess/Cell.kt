@@ -1,16 +1,11 @@
 package me.surge.common.chess
 
-import me.surge.common.chessColumn
-import me.surge.common.chessRow
 import me.surge.common.packet.IEmbeddable
 import org.json.JSONObject
 
 data class Cell(val x: Int, val y: Int, var piece: Pair<Piece, Side>) {
 
     var moved = false
-
-    val code: String
-        get() = "${x.chessColumn}${x.chessRow}"
 
     fun offset(offsetX: Int, offsetY: Int, board: Board): Cell {
         return board.find(this.x + offsetX, this.y + offsetY)
@@ -48,7 +43,7 @@ data class Cell(val x: Int, val y: Int, var piece: Pair<Piece, Side>) {
             }
         }
 
-        override fun embed(obj: Cell) = JSONObject()
+        override fun embed(obj: Cell): JSONObject = JSONObject()
             .put("x", obj.x)
             .put("y", obj.y)
             .put("piece", obj.piece.first)

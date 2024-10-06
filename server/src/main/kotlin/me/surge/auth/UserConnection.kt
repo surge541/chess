@@ -1,12 +1,9 @@
 package me.surge.auth
 
 import me.surge.Main
-import me.surge.common.auth.Account
 import me.surge.common.networking.Connection
 import me.surge.common.packet.Packet
 import java.net.Socket
-import java.nio.charset.Charset
-import java.util.Scanner
 
 class UserConnection(socket: Socket) : Connection(socket) {
 

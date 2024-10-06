@@ -5,7 +5,6 @@ import me.surge.common.chess.operators.KingOperator
 import me.surge.common.chess.operators.Operator
 import me.surge.common.packet.IEmbeddable
 import org.json.JSONObject
-import java.util.concurrent.CopyOnWriteArrayList
 
 class ChessGame(val id: Int, val white: PublicAccountDetails, val black: PublicAccountDetails) {
 
@@ -20,7 +19,7 @@ class ChessGame(val id: Int, val white: PublicAccountDetails, val black: PublicA
      * Updates this game with the given move, and processes it,
      * as well as calculating endings
      *
-     * @param move
+     * @param move that has just been played
      */
     fun update(move: Move) {
         if (move.side != turn) {
@@ -88,7 +87,7 @@ class ChessGame(val id: Int, val white: PublicAccountDetails, val black: PublicA
         return false to Side.EITHER
     }
 
-    override fun toString() = "Game $id (W $white, B $black)\n\tTurn: $turn\n\tMoves:\n\t\t${board.moves.joinToString { "$it\n\t\t" }}"
+    override fun toString() = "Game $id (W ${white.id}, B ${black.id})\n\tTurn: $turn\n\tMoves:\n\t\t${board.moves.joinToString { "$it\n\t\t" }}"
 
     enum class EndReason {
         CHECKMATE,

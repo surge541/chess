@@ -21,7 +21,7 @@ class RegisterScreen(previous: Screen?) : Screen(previous) {
 
     private val login = register(object : ButtonComponent("Register & Login", 0f, 0f, 300f, 40f) {
 
-        override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
+        override fun pressed(button: Button) {
             if (email.input.isNotBlank() && password.input.isNotBlank()) {
                 if (password.input == confirmPassword.input) {
                     Main.serverConnection!!.send(RegisterPacket(username.input, email.input, password.input))
@@ -68,9 +68,11 @@ class RegisterScreen(previous: Screen?) : Screen(previous) {
             }
 
             else -> {
-                Main.account = packet.account!!
+                Main.account = packet.accountDetails!!
                 Main.bus.unsubscribe(this)
                 Main.screen = MainScreen(this)
+
+                Main.signedIn = true
             }
         }
     }

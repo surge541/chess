@@ -6,9 +6,9 @@ import me.surge.client.Settings
 import me.surge.util.Button
 import org.nvgu.NVGU
 
-abstract class IconButtonComponent(val icon: String, x: Float, y: Float, width: Float, height: Float) : Component(x, y, width, height) {
+abstract class IconButtonComponent(private val icon: String, x: Float, y: Float, width: Float, height: Float) : Component(x, y, width, height) {
 
-    val hovered = Animation(200f, false, Easing.EXPO_IN_OUT)
+    private val hovered = Animation(200f, false, Easing.EXPO_IN_OUT)
 
     override fun update(mouseX: Float, mouseY: Float) {
         hovered.state = hovered(mouseX, mouseY)

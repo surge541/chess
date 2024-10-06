@@ -3,13 +3,12 @@ package me.surge.display.components
 import me.surge.Main
 import me.surge.client.Settings
 import me.surge.util.Button
-import me.surge.util.Theme
 import org.nvgu.NVGU
 import org.nvgu.util.Alignment
 
-class EnumComponent<T : Enum<*>>(val text: String, val default: T, x: Float, y: Float, width: Float, height: Float) : Component(x, y, width, height) {
+class EnumComponent<T : Enum<*>>(private val text: String, default: T, x: Float, y: Float, width: Float, height: Float) : Component(x, y, width, height) {
 
-    val list = ListComponent(default, 0f, y + 5f, 0f, height - 10f)
+    private val list = ListComponent(default, 0f, y + 5f, 0f, height - 10f)
 
     val selected: T
         get() = list.selected

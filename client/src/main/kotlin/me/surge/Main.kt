@@ -4,8 +4,7 @@ import me.surge.amalia.Bus
 import me.surge.amalia.handler.Listener
 import me.surge.client.ServerConnection
 import me.surge.client.Settings
-import me.surge.common.auth.Account
-import me.surge.common.chess.ChessGame
+import me.surge.common.auth.PublicAccountDetails
 import me.surge.common.chess.ChessGame.EndReason
 import me.surge.common.chess.Side
 import me.surge.common.log.Logger
@@ -39,17 +38,22 @@ object Main {
             field.unsubscribeThis()
                  .unsubscribe()
 
+            // resubscribe
             field = value.subscribeThis()
         }
 
+    // our connection to the server
     var serverConnection: ServerConnection? = null
-    lateinit var account: Account
 
+    // public account details, e.g. username, current game
+    var signedIn = false
+    lateinit var account: PublicAccountDetails
+
+    // timer to request game updates
     private val gameUpdateTimer = Timer()
-    private lateinit var gameUpdateThread: Thread
 
-    var game: ChessGame? = null
-    var side: Side? = null
+    // thread in which game updates are performed
+    private lateinit var gameUpdateThread: Thread
 
     var lastWinner: Side? = null
     var lastEndReason: EndReason? = null
@@ -59,8 +63,8 @@ object Main {
 
         gameUpdateThread = loopingThread("game-update") {
             try {
-                if (gameUpdateTimer.passed(500) && game != null) {
-                    serverConnection?.send(GameUpdateRequestPacket(game!!.id))
+                if (signedIn && gameUpdateTimer.passed(500) && account.game != null) {
+                    serverConnection?.send(GameUpdateRequestPacket(account.id))
                 }
             } catch (exception: Exception) {
                 exception.printStackTrace()
@@ -79,9 +83,9 @@ object Main {
                 screen = ServerScreen()
             }
 
-            if (game != null && !game!!.playing) {
-                lastWinner = game!!.winner
-                lastEndReason = game!!.endReason
+            if (signedIn && account.game != null && !account.game!!.playing) {
+                lastWinner = account.game!!.winner
+                lastEndReason = account.game!!.endReason
             }
 
             nvgu.frame(window.width, window.height) {
@@ -113,12 +117,7 @@ object Main {
 
     @Listener
     fun onGameUpdateResponse(packet: GameUpdateRequestPacket.GameUpdateRequestResponsePacket) {
-        this.game = packet.game
-
-        if (game?.playing == false) {
-            this.lastWinner = game?.winner
-            this.lastEndReason = game?.endReason
-        }
+        this.account = packet.accountDetails!!
     }
 
 }

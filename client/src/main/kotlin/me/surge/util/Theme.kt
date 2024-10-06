@@ -33,9 +33,6 @@ object Theme {
         dark
     )
 
-    //Color(198, 190, 168),
-    //Color(129, 113, 83),
-
     @JvmField val easing = Easing.EXPO_IN_OUT
 
     val typing: String

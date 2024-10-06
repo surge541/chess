@@ -10,7 +10,7 @@ import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import org.nvgu.NVGU
 import java.awt.Rectangle
 
-abstract class Screen(val previous: Screen?) {
+abstract class Screen(private val previous: Screen?) {
 
     protected val bounds = Rectangle(Main.window.width, Main.window.height)
 

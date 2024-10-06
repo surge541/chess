@@ -19,7 +19,7 @@ class LoginScreen(previous: Screen?) : Screen(previous) {
 
     private val login = register(object : ButtonComponent("Login", 0f, 0f, 300f, 40f) {
 
-        override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
+        override fun pressed(button: Button) {
             if (email.input.isNotBlank() && password.input.isNotBlank()) {
                 Main.serverConnection!!.send(LoginPacket(email.input, password.input))
             } else {
@@ -31,7 +31,7 @@ class LoginScreen(previous: Screen?) : Screen(previous) {
 
     private val register = register(object : ButtonComponent("Register", 0f, 0f, 100f, 16f) {
 
-        override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
+        override fun pressed(button: Button) {
             Main.screen = RegisterScreen(this@LoginScreen)
         }
 
@@ -66,9 +66,11 @@ class LoginScreen(previous: Screen?) : Screen(previous) {
             LoginPacket.LoginStatus.INCORRECT_PASSWORD -> message = "Incorrect Password"
 
             LoginPacket.LoginStatus.SUCCESS -> {
-                Main.account = packet.account!!
+                Main.account = packet.accountDetails!!
                 Main.bus.unsubscribe(this)
                 Main.screen = MainScreen(this)
+
+                Main.signedIn = true
             }
 
             else -> message = "Unknown Error"

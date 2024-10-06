@@ -5,7 +5,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 object KingOperator : Operator {
 
-    val offsets = listOf(
+    private val offsets = listOf(
         // left
         -1 to -1,
         -1 to 0,

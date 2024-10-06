@@ -14,7 +14,7 @@ import org.nvgu.NVGU
 import org.nvgu.util.Alignment
 
 class TextComponent(
-    val default: String,
+    private val default: String,
     x: Float,
     y: Float,
     width: Float,
@@ -23,9 +23,9 @@ class TextComponent(
     var censor: Boolean = false
 ) : Component(x, y, width, height) {
 
-    val hovered = Animation(200f, false, Easing.EXPO_IN_OUT)
+    private val hovered = Animation(200f, false, Easing.EXPO_IN_OUT)
     var input = ""
-    var listening = false
+    private var listening = false
 
     override fun update(mouseX: Float, mouseY: Float) {
         hovered.state = hovered(mouseX, mouseY)
@@ -72,6 +72,7 @@ class TextComponent(
     override fun char(char: Char): Boolean {
         if (listening && inputLayer.isAllowed(char)) {
             input += char
+            return true
         }
 
         return false
@@ -90,6 +91,8 @@ class TextComponent(
                     listening = false
                 }
             }
+
+            return true
         }
 
         return false

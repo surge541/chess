@@ -25,7 +25,7 @@ class Window(
 ) {
 
     // The window handle
-    var window: Long = 0
+    private var window: Long = 0
         private set
 
     var mouseX: Float = 0f
