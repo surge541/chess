@@ -1,13 +1,13 @@
 package me.surge.common.packet
 
-import me.surge.common.auth.Account
+import me.surge.common.auth.PublicAccountDetails
 import org.json.JSONObject
 
 class RegisterPacket(json: JSONObject) : Packet("register", json) {
 
-    val username = json.getString("username")
-    val email = json.getString("email")
-    val password = json.getString("password")
+    val username: String = json.getString("username")
+    val email: String = json.getString("email")
+    val password: String = json.getString("password")
 
     constructor(username: String, email: String, password: String) : this(JSONObject(mapOf(
         "username" to username,
@@ -17,12 +17,12 @@ class RegisterPacket(json: JSONObject) : Packet("register", json) {
 
     class RegistrationResponsePacket(json: JSONObject) : Packet("register-response", json) {
 
-        val response = json.getEnum(RegistrationStatus::class.java, "response")
-        val account = Account.extract("account", json)
+        val response: RegistrationStatus = json.getEnum(RegistrationStatus::class.java, "response")
+        val accountDetails = PublicAccountDetails.extract("accountDetails", json)
 
-        constructor(response: RegistrationStatus, account: Account?) : this(JSONObject(mapOf(
+        constructor(response: RegistrationStatus, accountDetails: PublicAccountDetails?) : this(JSONObject(mapOf(
             "response" to response,
-            "account" to if (account == null) null else Account.embed(account)
+            "accountDetails" to if (accountDetails == null) null else PublicAccountDetails.embed(accountDetails)
         )))
 
     }

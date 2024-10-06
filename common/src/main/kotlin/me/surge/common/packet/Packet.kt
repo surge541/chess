@@ -2,10 +2,8 @@ package me.surge.common.packet
 
 import me.surge.common.networking.Connection
 import org.json.JSONObject
-import java.net.Socket
-import java.nio.charset.Charset
 
-open class Packet(val id: String, val properties: JSONObject) {
+open class Packet(val id: String, private val properties: JSONObject) {
 
     lateinit var connection: Connection
 

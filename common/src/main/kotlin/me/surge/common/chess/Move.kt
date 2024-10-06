@@ -92,7 +92,7 @@ data class Move(val side: Side, val from: Cell, val to: Cell) {
                 .piece(piece)
         }
 
-        override fun embed(obj: Move) = JSONObject()
+        override fun embed(obj: Move): JSONObject = JSONObject()
             .put("side", obj.side)
             .put("tag", obj.tag)
             .put("piece", obj.piece)

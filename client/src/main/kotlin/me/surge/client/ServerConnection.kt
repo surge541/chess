@@ -4,11 +4,8 @@ import me.surge.Main
 import me.surge.common.managers.ThreadManager.submit
 import me.surge.common.networking.Connection
 import me.surge.common.packet.Packet
-import java.net.Socket
-import java.nio.charset.Charset
-import java.util.Scanner
 
-class ServerConnection(val address: String, val port: Int) : Connection(address, port) {
+class ServerConnection(private val address: String, private val port: Int) : Connection(address, port) {
 
     init {
         Main.logger.info("Connecting to $address:$port")

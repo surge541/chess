@@ -68,9 +68,11 @@ class RegisterScreen(previous: Screen?) : Screen(previous) {
             }
 
             else -> {
-                Main.account = packet.account!!
+                Main.account = packet.accountDetails!!
                 Main.bus.unsubscribe(this)
                 Main.screen = MainScreen(this)
+
+                Main.signedIn = true
             }
         }
     }

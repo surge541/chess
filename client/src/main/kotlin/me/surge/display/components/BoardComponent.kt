@@ -44,7 +44,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
     }
 
     override fun draw(ctx: NVGU, mouseX: Float, mouseY: Float) {
-        if (Main.game != null && Main.game!!.turn != Main.side) {
+        if (Main.account.game != null && Main.account.game!!.turn != Main.account.side) {
             selectableMoves.clear()
         }
 
@@ -57,7 +57,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
             val renderCells = ArrayList(cells)
 
-            if (Main.game != null && Main.side == Side.BLACK) {
+            if (Main.account.game != null && Main.account.side == Side.BLACK) {
                 renderCells.reverse()
             }
 
@@ -93,8 +93,8 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
         // draw ending overlay
         run {
-            if (Main.game != null) {
-                val game = Main.game!!
+            if (Main.account.game != null) {
+                val game = Main.account.game!!
 
                 if (!game.playing && Main.lastEndReason != null && Main.lastWinner != null) {
                     ended.state = true
@@ -121,7 +121,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
     }
 
     override fun click(mouseX: Float, mouseY: Float, button: Button): Boolean {
-        if (Main.game?.playing == true) {
+        if (Main.account.game?.playing == true) {
             cells.forEach {
                 if (it.click(mouseX, mouseY, button)) {
                     return true
@@ -136,11 +136,11 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
 
     fun get(cell: Cell): RenderCell = cells.find { it.cell == cell }!!
 
-    fun isCellOurs(cell: Cell): Boolean = cell.piece.second == Main.side
+    fun isCellOurs(cell: Cell): Boolean = cell.piece.second == Main.account.side
 
     @Listener
     fun onGameUpdate(packet: GameUpdateRequestPacket.GameUpdateRequestResponsePacket) {
-        board.sync(packet.game!!.board)
+        board.sync(packet.accountDetails!!.game!!.board)
     }
 
     fun resetCells() {
@@ -161,7 +161,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
         }
     }
 
-    inner class RenderCell(x: Float, y: Float, var dimension: Float, val cell: Cell, val colour: Color) : Component(x, y, dimension, dimension) {
+    inner class RenderCell(x: Float, y: Float, var dimension: Float, val cell: Cell, private val colour: Color) : Component(x, y, dimension, dimension) {
 
         private val hovered = Animation(400f, false, Theme.easing)
 
@@ -213,7 +213,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
                 Main.screen.prioritised = null
             }
 
-            if (hovered(mouseX, mouseY) && Main.game != null && Main.side != null && Main.game!!.turn == Main.side) {
+            if (hovered(mouseX, mouseY) && Main.account.game != null && Main.account.side != null && Main.account.game!!.turn == Main.account.side) {
                 if (selectableMoves.any { it.to == cell } && selectedCell != null) {
                     val move = selectableMoves.first { it.to == cell }
 
@@ -223,18 +223,18 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
                         return true
                     }
 
-                    Main.serverConnection!!.send(ClientGameUpdate(Main.game!!.id, move))
+                    Main.serverConnection!!.send(ClientGameUpdate(Main.account.game!!.id, move))
                     return true
                 }
 
                 selectableMoves.clear()
 
                 if (isCellOurs(cell)) {
-                    operator = Operator.getOperator(this.cell, Main.side!!)
+                    operator = Operator.getOperator(this.cell, Main.account.side!!)
 
                     if (operator != null) {
                         selectedCell = this.cell
-                        selectableMoves.addAll(operator!!.collectTiles(this.cell, board, Main.side!!))
+                        selectableMoves.addAll(operator!!.collectTiles(this.cell, board, Main.account.side!!))
                     }
                 } else {
                     operator = null
@@ -298,7 +298,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
         }
 
         private fun press(piece: Piece) {
-            Main.serverConnection!!.send(ClientGameUpdate(Main.game!!.id, move.piece(piece)))
+            Main.serverConnection!!.send(ClientGameUpdate(Main.account.game!!.id, move.piece(piece)))
             Main.screen.prioritised = null
             cell.pawnPromoter = null
         }

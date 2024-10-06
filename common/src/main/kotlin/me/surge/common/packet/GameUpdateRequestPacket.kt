@@ -1,22 +1,22 @@
 package me.surge.common.packet
 
-import me.surge.common.chess.ChessGame
+import me.surge.common.auth.PublicAccountDetails
 import org.json.JSONObject
 
 class GameUpdateRequestPacket(json: JSONObject) : Packet("gupdatereq", json) {
 
-    val gameId = json.getInt("gameId")
+    val accountId = json.getInt("accountId")
 
-    constructor(gameId: Int) : this(JSONObject(mapOf(
-        "gameId" to gameId
+    constructor(accountId: Int) : this(JSONObject(mapOf(
+        "accountId" to accountId
     )))
 
     class GameUpdateRequestResponsePacket(json: JSONObject) : Packet("gupdatereq-response", json) {
 
-        val game = ChessGame.extract("game", json)
+        val accountDetails = PublicAccountDetails.extract("account", json)
 
-        constructor(game: ChessGame) : this(JSONObject(mapOf(
-            "game" to ChessGame.embed(game)
+        constructor(accountDetails: PublicAccountDetails) : this(JSONObject(mapOf(
+            "account" to PublicAccountDetails.embed(accountDetails)
         )))
 
     }

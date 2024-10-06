@@ -2,7 +2,8 @@ package me.surge.games
 
 import me.surge.Main
 import me.surge.amalia.handler.Listener
-import me.surge.common.auth.Account
+import me.surge.auth.AuthorisationHandler
+import me.surge.common.auth.PublicAccountDetails
 import me.surge.common.chess.ChessGame
 import me.surge.common.chess.Side
 import me.surge.common.managers.ThreadManager.loopingThread
@@ -17,68 +18,71 @@ object GameManager {
     private val games = mutableListOf<ChessGame>()
     private val matchmaking = CopyOnWriteArrayList<MatchRequest>()
 
-    private val matchmakingThread = loopingThread("matchmaking") {
-        matchmaking.forEach { request ->
-            val validSides = when (request.packet.requestedSide) {
-                Side.EITHER -> listOf(Side.EITHER, Side.BLACK, Side.WHITE)
-                Side.WHITE -> listOf(Side.EITHER, Side.BLACK)
-                Side.BLACK -> listOf(Side.EITHER, Side.WHITE)
-            }
-
-            val opponent = matchmaking.firstOrNull {
-                it.account != request.account && // not the current account
-                        it.requested in validSides
-            }
-
-            if (opponent != null) {
-                Main.server.logger.info("Creating match between ${request.account.username} and ${opponent.account.username}")
-
-                val game = when (request.requested) {
-                    Side.WHITE -> {
-                        ChessGame(games.size, request.account.public, opponent.account.public)
-                    }
-
-                    Side.BLACK -> {
-                        ChessGame(games.size, opponent.account.public, request.account.public)
-                    }
-
-                    Side.EITHER -> {
-                        if (Random.nextInt(2) == 0) {
-                            ChessGame(games.size, request.account.public, opponent.account.public)
-                        } else {
-                            ChessGame(games.size, opponent.account.public, request.account.public)
-                        }
-                    }
+    fun init() {
+        loopingThread("matchmaking") {
+            matchmaking.forEach { request ->
+                val validSides = when (request.packet.requestedSide) {
+                    Side.EITHER -> listOf(Side.EITHER, Side.BLACK, Side.WHITE)
+                    Side.WHITE -> listOf(Side.EITHER, Side.BLACK)
+                    Side.BLACK -> listOf(Side.EITHER, Side.WHITE)
                 }
 
-                games.add(game)
+                val opponent = matchmaking.firstOrNull {
+                    it.account != request.account && // not the current account
+                            it.requested in validSides
+                }
 
-                request.packet.respond(GameCreationRequestPacket.GameCreationRequestResponsePacket(
-                    request.packet.account,
-                    game
-                ))
+                if (opponent != null) {
+                    Main.server.logger.info("Creating match between ${request.account.username} and ${opponent.account.username}")
 
-                opponent.packet.respond(GameCreationRequestPacket.GameCreationRequestResponsePacket(
-                    opponent.packet.account,
-                    game
-                ))
+                    val game = when (request.requested) {
+                        Side.WHITE -> {
+                            ChessGame(games.size, request.account, opponent.account)
+                        }
 
-                matchmaking.remove(request)
-                matchmaking.remove(opponent)
+                        Side.BLACK -> {
+                            ChessGame(games.size, opponent.account, request.account)
+                        }
+
+                        Side.EITHER -> {
+                            if (Random.nextInt(2) == 0) {
+                                ChessGame(games.size, request.account, opponent.account)
+                            } else {
+                                ChessGame(games.size, opponent.account, request.account)
+                            }
+                        }
+                    }
+
+                    games.add(game)
+
+                    AuthorisationHandler.updateGame(request.packet.accountDetails.id, game)
+                    AuthorisationHandler.updateGame(opponent.packet.accountDetails.id, game)
+
+                    request.packet.respond(GameCreationRequestPacket.GameCreationRequestResponsePacket(
+                        AuthorisationHandler.fetchId(request.packet.accountDetails.id)!!
+                    ))
+
+                    opponent.packet.respond(GameCreationRequestPacket.GameCreationRequestResponsePacket(
+                        AuthorisationHandler.fetchId(opponent.packet.accountDetails.id)!!
+                    ))
+
+                    matchmaking.remove(request)
+                    matchmaking.remove(opponent)
+                }
             }
-        }
 
-        Thread.sleep(500L)
+            Thread.sleep(500L)
+        }
     }
 
     @Listener
     fun gameCreationRequest(packet: GameCreationRequestPacket) {
-        Main.server.logger.info("Creating random matchmake for ${packet.account.username}")
+        Main.server.logger.info("Creating random matchmake for ${packet.accountDetails.username}")
 
         // remove any existing matchmaking requests
-        matchmaking.removeIf { it.account == packet.account }
+        matchmaking.removeIf { it.account == packet.accountDetails }
 
-        matchmaking.add(MatchRequest(packet.account, packet.requestedSide, packet))
+        matchmaking.add(MatchRequest(packet.accountDetails, packet.requestedSide, packet))
     }
 
     @Listener
@@ -92,13 +96,13 @@ object GameManager {
 
     @Listener
     fun gameUpdateRequest(packet: GameUpdateRequestPacket) {
-        val game = games.firstOrNull { it.id == packet.gameId }
+        val accountDetails = AuthorisationHandler.fetchId(packet.accountId)
 
-        if (game != null) {
-            packet.respond(GameUpdateRequestPacket.GameUpdateRequestResponsePacket(game))
+        if (accountDetails != null) {
+            packet.respond(GameUpdateRequestPacket.GameUpdateRequestResponsePacket(accountDetails))
         }
     }
 
-    data class MatchRequest(val account: Account, val requested: Side, val packet: GameCreationRequestPacket)
+    data class MatchRequest(val account: PublicAccountDetails, val requested: Side, val packet: GameCreationRequestPacket)
 
 }

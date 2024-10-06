@@ -20,7 +20,7 @@ class MainScreen(previous: Screen?) : Screen(previous) {
 
     val play = register(object : ButtonComponent("Play Random Opponent", 820f, 200f, 250f, 40f) {
 
-        override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
+        override fun pressed(button: Button) {
             Main.serverConnection!!.send(GameCreationRequestPacket(
                 Main.account,
                 enum.selected
@@ -31,7 +31,7 @@ class MainScreen(previous: Screen?) : Screen(previous) {
 
     val enum = register(EnumComponent("Side", Side.EITHER, 820f, 260f, 200f, 40f))
 
-    var board = register(BoardComponent(Board(), 400f, 200f, 400f))
+    private var board = register(BoardComponent(Board(), 400f, 200f, 400f))
 
     override fun draw(ctx: NVGU, mouseX: Float, mouseY: Float) {
         defaultBackground(ctx)
@@ -47,15 +47,13 @@ class MainScreen(previous: Screen?) : Screen(previous) {
     fun gameCreationRequestResponse(packet: GameCreationRequestPacket.GameCreationRequestResponsePacket) {
         Main.logger.info("Game Created")
 
-        if (packet.account == null) {
+        if (packet.accountDetails == null) {
             return
         }
 
-        Main.account = packet.account!!
-        Main.game = packet.game!!
-        Main.side = if (Main.account.id == packet.game!!.white.id) Side.WHITE else Side.BLACK
+        Main.account = packet.accountDetails!!
 
-        board.board = Main.game!!.board
+        board.board = Main.account.game!!.board
         board.resetCells()
     }
 

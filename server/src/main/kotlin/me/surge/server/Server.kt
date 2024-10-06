@@ -26,6 +26,8 @@ class Server(private val port: Int) {
     fun start(): Server {
         logger.info("Running Chess server on port $port")
 
+        GameManager.init()
+
         thread {
             while (Main.open) {
                 val client = serverSocket.accept()

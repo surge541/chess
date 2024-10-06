@@ -9,10 +9,10 @@ import java.util.Scanner
 open class Connection(private var socket: Socket?) {
 
     lateinit var reader: Scanner
-    lateinit var writer: OutputStream
+    private lateinit var writer: OutputStream
 
     val connected: Boolean
-        get() = socket == null || !socket!!.isClosed
+        get() = socket != null && !socket!!.isClosed
 
     init {
         if (socket != null) {
@@ -35,10 +35,7 @@ open class Connection(private var socket: Socket?) {
     }
 
     fun send(packet: Packet) {
-        val data = (packet.write() + '\n')
-
-        writer.write(data.toByteArray(Charset.defaultCharset()))
-        writer.flush()
+        writer.write((packet.write() + '\n').toByteArray(Charset.defaultCharset()))
     }
 
 }

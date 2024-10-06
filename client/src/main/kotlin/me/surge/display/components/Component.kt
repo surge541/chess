@@ -10,7 +10,6 @@ abstract class Component(var x: Float, var y: Float, var width: Float, var heigh
     abstract fun draw(ctx: NVGU, mouseX: Float, mouseY: Float)
 
     open fun click(mouseX: Float, mouseY: Float, button: Button) = false
-    open fun release(mouseX: Float, mouseY: Float, button: Button) = false
     open fun char(char: Char) = false
     open fun key(code: Int) = false
 

@@ -4,11 +4,10 @@ import me.surge.animation.Animation
 import me.surge.animation.Easing
 import me.surge.client.Settings
 import me.surge.util.Button
-import me.surge.util.Theme
 import org.nvgu.NVGU
 import org.nvgu.util.Alignment
 
-abstract class ButtonComponent(val text: String, x: Float, y: Float, width: Float, height: Float) : Component(x, y, width, height) {
+abstract class ButtonComponent(private val text: String, x: Float, y: Float, width: Float, height: Float) : Component(x, y, width, height) {
 
     private var dull = false
     private val hovered = Animation(200f, false, Easing.EXPO_IN_OUT)
@@ -35,7 +34,7 @@ abstract class ButtonComponent(val text: String, x: Float, y: Float, width: Floa
 
     override fun click(mouseX: Float, mouseY: Float, button: Button): Boolean {
         if (button == Button.LEFT && hovered.state) {
-            pressed(mouseX, mouseY, button)
+            pressed(button)
 
             return true
         }
@@ -43,7 +42,7 @@ abstract class ButtonComponent(val text: String, x: Float, y: Float, width: Floa
         return false
     }
 
-    abstract fun pressed(mouseX: Float, mouseY: Float, button: Button)
+    abstract fun pressed(button: Button)
 
     fun dull(): ButtonComponent {
         this.dull = true

@@ -2,7 +2,7 @@ package me.surge.common.util
 
 class Timer {
 
-    val time: Long
+    private val time: Long
         get() = System.currentTimeMillis() - lastMillis
 
     private var lastMillis = -1L
@@ -28,7 +28,7 @@ class Timer {
     /**
      * Resets the timer to 0ms
      */
-    fun reset() {
+    private fun reset() {
         lastMillis = System.currentTimeMillis()
     }
 
