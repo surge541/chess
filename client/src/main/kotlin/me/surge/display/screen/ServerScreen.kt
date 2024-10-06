@@ -45,6 +45,8 @@ class ServerScreen : Screen(null) {
     override fun draw(ctx: NVGU, mouseX: Float, mouseY: Float) {
         defaultBackground(ctx)
 
+        //println(message)
+
         ctx.text("Join Server", Main.window.width / 2f, Main.window.height / 2f - 150f, Settings.theme.onBackground, "poppins", 30, Alignment.CENTER_MIDDLE)
             .text(message, Main.window.width / 2f, Main.window.height - 30f, Color.RED, "poppins", 16, Alignment.CENTER_MIDDLE)
     }
