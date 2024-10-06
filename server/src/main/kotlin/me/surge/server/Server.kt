@@ -58,7 +58,7 @@ class Server(private val port: Int) {
     fun register(packet: RegisterPacket) {
         logger.info("Registration Packet received: ${packet.email}, ${packet.password}")
 
-        val response = AuthorisationHandler.registerAccount(
+        val response = AuthorisationHandler.register(
             packet.username,
             packet.email,
             packet.password

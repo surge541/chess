@@ -1,0 +1,44 @@
+package me.surge.common.networking
+
+import me.surge.common.packet.Packet
+import java.io.OutputStream
+import java.net.Socket
+import java.nio.charset.Charset
+import java.util.Scanner
+
+open class Connection(private var socket: Socket?) {
+
+    lateinit var reader: Scanner
+    lateinit var writer: OutputStream
+
+    val connected: Boolean
+        get() = socket == null || !socket!!.isClosed
+
+    init {
+        if (socket != null) {
+            reader = Scanner(socket!!.getInputStream())
+            writer = socket!!.getOutputStream()
+        }
+    }
+
+    constructor(address: String, port: Int): this(null) {
+        try {
+            socket = Socket(address, port)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            socket = null
+            return
+        }
+
+        reader = Scanner(socket!!.getInputStream())
+        writer = socket!!.getOutputStream()
+    }
+
+    fun send(packet: Packet) {
+        val data = (packet.write() + '\n')
+
+        writer.write(data.toByteArray(Charset.defaultCharset()))
+        writer.flush()
+    }
+
+}

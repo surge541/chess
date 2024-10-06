@@ -1,22 +1,24 @@
 package me.surge.common.packet
 
+import me.surge.common.networking.Connection
 import org.json.JSONObject
 import java.net.Socket
 import java.nio.charset.Charset
 
 open class Packet(val id: String, val properties: JSONObject) {
 
-    lateinit var client: Socket
+    lateinit var connection: Connection
 
     fun write() = "${properties.put("id", id)}"
 
     fun respond(packet: Packet) {
-        client.getOutputStream().write((packet.write() + '\n').toByteArray(Charset.defaultCharset()))
+        //connection.getOutputStream().write((packet.write() + '\n').toByteArray(Charset.defaultCharset()))
+        connection.send(packet)
     }
 
     companion object {
 
-        fun decode(json: String): Packet {
+        fun decode(json: String, connection: Connection): Packet {
             val obj = JSONObject(json)
 
             val id = obj.getString("id")
@@ -32,6 +34,8 @@ open class Packet(val id: String, val properties: JSONObject) {
                 "gupdatereq" -> GameUpdateRequestPacket(obj)
                 "gupdatereq-response" -> GameUpdateRequestPacket.GameUpdateRequestResponsePacket(obj)
                 else -> Packet("unknown", obj)
+            }.also {
+                it.connection = connection
             }
         }
 

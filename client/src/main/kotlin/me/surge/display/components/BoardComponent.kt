@@ -223,7 +223,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
                         return true
                     }
 
-                    Main.connection!!.post(ClientGameUpdate(Main.game!!.id, move))
+                    Main.serverConnection!!.send(ClientGameUpdate(Main.game!!.id, move))
                     return true
                 }
 
@@ -298,7 +298,7 @@ class BoardComponent(board: Board, x: Float, y: Float, dimension: Float) : Compo
         }
 
         private fun press(piece: Piece) {
-            Main.connection!!.post(ClientGameUpdate(Main.game!!.id, move.piece(piece)))
+            Main.serverConnection!!.send(ClientGameUpdate(Main.game!!.id, move.piece(piece)))
             Main.screen.prioritised = null
             cell.pawnPromoter = null
         }

@@ -24,7 +24,7 @@ class RegisterScreen(previous: Screen?) : Screen(previous) {
         override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
             if (email.input.isNotBlank() && password.input.isNotBlank()) {
                 if (password.input == confirmPassword.input) {
-                    Main.connection!!.post(RegisterPacket(username.input, email.input, password.input))
+                    Main.serverConnection!!.send(RegisterPacket(username.input, email.input, password.input))
                 } else {
                     message = "Password and Confirm Password fields must match"
                 }

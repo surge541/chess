@@ -17,7 +17,7 @@ object AuthorisationHandler {
      * @param password [String] that will be used to authenticate logins
      * @return [Pair] of a [RegisterPacket.RegistrationStatus] relaying the registration result, and, if successful, the [Account] object
      */
-    fun registerAccount(username: String, email: String, password: String): Pair<RegisterPacket.RegistrationStatus, Account?> {
+    fun register(username: String, email: String, password: String): Pair<RegisterPacket.RegistrationStatus, Account?> {
         // account with provided email already exists
         if (fetch(email, Fetch.EMAIL) != null) {
             return RegisterPacket.RegistrationStatus.EMAIL_ALREADY_EXISTS to null
@@ -58,7 +58,7 @@ object AuthorisationHandler {
      * @param fetch [Fetch] mode
      * @return [Account] instance, or null depending on whether it was found
      */
-    fun fetch(qualifier: String, fetch: Fetch = Fetch.EITHER): Account? {
+    private fun fetch(qualifier: String, fetch: Fetch = Fetch.EITHER): Account? {
         return accounts.firstOrNull {
             when (fetch) {
                 Fetch.EMAIL -> it.email == qualifier
@@ -69,8 +69,19 @@ object AuthorisationHandler {
     }
 
     enum class Fetch {
+        /**
+         * Filter accounts only through email
+         */
         EMAIL,
+
+        /**
+         * Filter accounts only through username
+         */
         USERNAME,
+
+        /**
+         * Filter accounts by whether the email or username is equal
+         */
         EITHER
     }
 

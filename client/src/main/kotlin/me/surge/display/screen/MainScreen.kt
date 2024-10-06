@@ -6,26 +6,22 @@ import me.surge.client.Settings
 import me.surge.common.chess.Board
 import me.surge.common.chess.Side
 import me.surge.common.packet.GameCreationRequestPacket
-import me.surge.common.packet.GameUpdateRequestPacket
 import me.surge.display.components.BoardComponent
 import me.surge.display.components.ButtonComponent
 import me.surge.display.components.EnumComponent
 import me.surge.util.Button
-import me.surge.util.Theme
 import org.nvgu.NVGU
-import org.nvgu.util.Border
 import java.awt.Rectangle
-import kotlin.concurrent.thread
 
 class MainScreen(previous: Screen?) : Screen(previous) {
 
-    val userInfoBounds: Rectangle
+    private val userInfoBounds: Rectangle
         get() = Rectangle(bounds.x + 15, bounds.y + 15, 300, 80)
 
     val play = register(object : ButtonComponent("Play Random Opponent", 820f, 200f, 250f, 40f) {
 
         override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
-            Main.connection!!.post(GameCreationRequestPacket(
+            Main.serverConnection!!.send(GameCreationRequestPacket(
                 Main.account,
                 enum.selected
             ))

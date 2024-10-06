@@ -2,7 +2,7 @@ package me.surge
 
 import me.surge.amalia.Bus
 import me.surge.amalia.handler.Listener
-import me.surge.client.Connection
+import me.surge.client.ServerConnection
 import me.surge.client.Settings
 import me.surge.common.auth.Account
 import me.surge.common.chess.ChessGame
@@ -42,7 +42,7 @@ object Main {
             field = value.subscribeThis()
         }
 
-    var connection: Connection? = null
+    var serverConnection: ServerConnection? = null
     lateinit var account: Account
 
     private val gameUpdateTimer = Timer()
@@ -60,7 +60,7 @@ object Main {
         gameUpdateThread = loopingThread("game-update") {
             try {
                 if (gameUpdateTimer.passed(500) && game != null) {
-                    connection?.post(GameUpdateRequestPacket(game!!.id))
+                    serverConnection?.send(GameUpdateRequestPacket(game!!.id))
                 }
             } catch (exception: Exception) {
                 exception.printStackTrace()
@@ -74,8 +74,8 @@ object Main {
 
             Theme.registeredThemes.forEach(Theme.Option::loadTextures)
         }) {
-            if (connection != null && !connection!!.connected) {
-                connection = null
+            if (serverConnection != null && !serverConnection!!.connected) {
+                serverConnection = null
                 screen = ServerScreen()
             }
 

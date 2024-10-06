@@ -8,7 +8,6 @@ import me.surge.display.components.ButtonComponent
 import me.surge.display.components.TextComponent
 import me.surge.util.Button
 import me.surge.util.InputLayers
-import me.surge.util.Theme
 import org.nvgu.NVGU
 import org.nvgu.util.Alignment
 import java.awt.Color
@@ -22,7 +21,7 @@ class LoginScreen(previous: Screen?) : Screen(previous) {
 
         override fun pressed(mouseX: Float, mouseY: Float, button: Button) {
             if (email.input.isNotBlank() && password.input.isNotBlank()) {
-                Main.connection!!.post(LoginPacket(email.input, password.input))
+                Main.serverConnection!!.send(LoginPacket(email.input, password.input))
             } else {
                 message = "All fields must be filled in"
             }

@@ -1,15 +1,12 @@
 package me.surge.display.screen
 
 import me.surge.Main
-import me.surge.client.Connection
+import me.surge.client.ServerConnection
 import me.surge.client.Settings
-import me.surge.common.chess.Side
 import me.surge.display.components.ButtonComponent
-import me.surge.display.components.EnumComponent
 import me.surge.display.components.TextComponent
 import me.surge.util.Button
 import me.surge.util.InputLayers
-import me.surge.util.Theme
 import org.nvgu.NVGU
 import org.nvgu.util.Alignment
 import java.awt.Color
@@ -37,16 +34,16 @@ class ServerScreen : Screen(null) {
                 }
             }*/
 
-            val connection = Connection(address.input, port.input.toInt())
+            val serverConnection = ServerConnection(address.input, port.input.toInt())
 
-            connection.begin()
+            serverConnection.begin()
 
-            if (connection.connected) {
+            if (serverConnection.connected) {
                 Main.screen = LoginScreen(this@ServerScreen)
-                Main.connection = connection
+                Main.serverConnection = serverConnection
             } else {
                 message = "Failed to connect to ${address.input}:${port.input}"
-                Main.connection = null
+                Main.serverConnection = null
             }
         }
 

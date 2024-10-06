@@ -2,32 +2,27 @@ package me.surge.auth
 
 import me.surge.Main
 import me.surge.common.auth.Account
+import me.surge.common.networking.Connection
 import me.surge.common.packet.Packet
 import java.net.Socket
 import java.nio.charset.Charset
 import java.util.Scanner
 
-class UserConnection(val socket: Socket) {
-
-    val reader = Scanner(socket.getInputStream())
-    var running = true
+class UserConnection(socket: Socket) : Connection(socket) {
 
     fun start() {
-        while (running) {
+        while (connected) {
             if (!reader.hasNextLine()) {
                 continue
             }
 
-            runCatching {
-                val accepted = reader.nextLine()
-                val decoded = Packet.decode(accepted)
+            // get data sent by client
+            val accepted = reader.nextLine()
 
-                decoded.client = this.socket
+            // translate into a packet object
+            val decoded = Packet.decode(accepted, this)
 
-                Main.bus.post(decoded)
-            }.onFailure {
-                it.printStackTrace()
-            }
+            Main.bus.post(decoded)
         }
     }
 }
