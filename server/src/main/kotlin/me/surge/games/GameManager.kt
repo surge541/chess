@@ -10,6 +10,7 @@ import me.surge.common.managers.ThreadManager.loopingThread
 import me.surge.common.packet.ClientGameUpdate
 import me.surge.common.packet.GameCreationRequestPacket
 import me.surge.common.packet.GameUpdateRequestPacket
+import me.surge.server.Server
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.random.Random
 
@@ -33,7 +34,7 @@ object GameManager {
                 }
 
                 if (opponent != null) {
-                    Main.server.logger.info("Creating match between ${request.account.username} and ${opponent.account.username}")
+                    Server.logger.info("Creating match between ${request.account.username} and ${opponent.account.username}")
 
                     val game = when (request.requested) {
                         Side.WHITE -> {
@@ -59,11 +60,11 @@ object GameManager {
                     AuthorisationHandler.updateGame(opponent.packet.accountDetails.id, game)
 
                     request.packet.respond(GameCreationRequestPacket.GameCreationRequestResponsePacket(
-                        AuthorisationHandler.fetchId(request.packet.accountDetails.id)!!
+                        AuthorisationHandler.fetchId(request.packet.accountDetails.id)!!.public
                     ))
 
                     opponent.packet.respond(GameCreationRequestPacket.GameCreationRequestResponsePacket(
-                        AuthorisationHandler.fetchId(opponent.packet.accountDetails.id)!!
+                        AuthorisationHandler.fetchId(opponent.packet.accountDetails.id)!!.public
                     ))
 
                     matchmaking.remove(request)
@@ -77,7 +78,7 @@ object GameManager {
 
     @Listener
     fun gameCreationRequest(packet: GameCreationRequestPacket) {
-        Main.server.logger.info("Creating random matchmake for ${packet.accountDetails.username}")
+        Server.logger.info("Creating random matchmake for ${packet.accountDetails.username}")
 
         // remove any existing matchmaking requests
         matchmaking.removeIf { it.account == packet.accountDetails }
@@ -87,7 +88,7 @@ object GameManager {
 
     @Listener
     fun clientGameUpdate(packet: ClientGameUpdate) {
-        Main.server.logger.info("Client Game Update on game ${packet.gameId}")
+        Server.logger.info("Client Game Update on game ${packet.gameId}")
 
         with(games.first { it.id == packet.gameId }) {
             update(packet.move!!)
@@ -99,7 +100,7 @@ object GameManager {
         val accountDetails = AuthorisationHandler.fetchId(packet.accountId)
 
         if (accountDetails != null) {
-            packet.respond(GameUpdateRequestPacket.GameUpdateRequestResponsePacket(accountDetails))
+            packet.respond(GameUpdateRequestPacket.GameUpdateRequestResponsePacket(accountDetails.public))
         }
     }
 

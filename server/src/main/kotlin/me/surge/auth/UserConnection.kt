@@ -22,4 +22,5 @@ class UserConnection(socket: Socket) : Connection(socket) {
             Main.bus.post(decoded)
         }
     }
+
 }

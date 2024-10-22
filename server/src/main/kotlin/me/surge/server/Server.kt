@@ -13,10 +13,12 @@ import me.surge.games.GameManager
 import java.net.ServerSocket
 import kotlin.concurrent.thread
 
-class Server(private val port: Int) {
+object Server {
 
-    val logger = Logger("SERVER $port")
-    private val serverSocket = ServerSocket(port)
+    const val PORT = 5000
+
+    val logger = Logger("SERVER $PORT")
+    private val serverSocket = ServerSocket(PORT)
 
     init {
         Main.bus.subscribe(this)
@@ -24,9 +26,10 @@ class Server(private val port: Int) {
     }
 
     fun start(): Server {
-        logger.info("Running Chess server on port $port")
+        logger.info("Running Chess server on port $PORT")
 
         GameManager.init()
+        NetworkHandler.init()
 
         thread {
             while (Main.open) {
@@ -53,6 +56,10 @@ class Server(private val port: Int) {
             packet.password
         )
 
+        if (response.first == LoginPacket.LoginStatus.SUCCESS) {
+            NetworkHandler.submitConnection(response.second!!.id, packet.connection)
+        }
+
         packet.respond(LoginPacket.LoginResponsePacket(response.first, response.second))
     }
 
@@ -65,6 +72,10 @@ class Server(private val port: Int) {
             packet.email,
             packet.password
         )
+
+        if (response.first == RegisterPacket.RegistrationStatus.SUCCESS) {
+            NetworkHandler.submitConnection(response.second!!.id, packet.connection)
+        }
 
         packet.respond(RegisterPacket.RegistrationResponsePacket(response.first, response.second))
     }

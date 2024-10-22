@@ -1,21 +1,18 @@
 package me.surge
 
 import me.surge.amalia.Bus
+import me.surge.gui.GUI
 import me.surge.server.Server
 
 object Main {
 
     val bus = Bus()
-    lateinit var server: Server
-
     var open = true
 
     @JvmStatic fun main(args: Array<String>) {
-        val port: Int = runCatching {
-            args[0].toInt()
-        }.getOrElse { 5000 }
+        Server.start()
 
-        server = Server(port).start()
+        GUI.display()
     }
 
 }

@@ -11,6 +11,7 @@ import me.surge.common.log.Logger
 import me.surge.common.managers.ThreadManager
 import me.surge.common.managers.ThreadManager.loopingThread
 import me.surge.common.packet.GameUpdateRequestPacket
+import me.surge.common.packet.KeepAlivePacket
 import me.surge.common.util.Timer
 import me.surge.display.Window
 import me.surge.display.screen.Screen
@@ -55,11 +56,23 @@ object Main {
     // thread in which game updates are performed
     private lateinit var gameUpdateThread: Thread
 
+    // timer to send keep-alive packets
+    private val keepAliveTimer = Timer()
+
+    // thread in which keep-alive packets are sent
+    private lateinit var keepAliveThread: Thread
+
     var lastWinner: Side? = null
     var lastEndReason: EndReason? = null
 
     @JvmStatic fun main(args: Array<String>) {
         Settings.load()
+
+        keepAliveThread = loopingThread("keep-alive") {
+            if (serverConnection != null && keepAliveTimer.passed(1000L)) {
+                serverConnection!!.send(KeepAlivePacket())
+            }
+        }
 
         gameUpdateThread = loopingThread("game-update") {
             try {

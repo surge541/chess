@@ -6,7 +6,7 @@ import java.net.Socket
 import java.nio.charset.Charset
 import java.util.Scanner
 
-open class Connection(private var socket: Socket?) {
+open class Connection(var socket: Socket?) {
 
     lateinit var reader: Scanner
     private lateinit var writer: OutputStream
@@ -36,6 +36,14 @@ open class Connection(private var socket: Socket?) {
 
     fun send(packet: Packet) {
         writer.write((packet.write() + '\n').toByteArray(Charset.defaultCharset()))
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Connection) {
+            return false
+        }
+
+        return socket == other.socket
     }
 
 }

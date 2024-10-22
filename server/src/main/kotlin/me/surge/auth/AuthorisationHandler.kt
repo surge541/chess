@@ -73,6 +73,14 @@ object AuthorisationHandler {
     }
 
     /**
+     * Filters the list of accounts by their online status
+     * @return filtered list
+     */
+    fun getOnlineUsers(): List<Account> {
+        return accounts.filter { it.online }
+    }
+
+    /**
      * Attempts to fetch an account from the database // TODO: Database
      *
      * @param qualifier [String] to compare to the email / username of accounts
@@ -95,8 +103,8 @@ object AuthorisationHandler {
      * @param id of the account
      * @return [PublicAccountDetails] instance, or null depending on whether it was found
      */
-    fun fetchId(id: Int): PublicAccountDetails? {
-        return accounts.firstOrNull { it.id == id }?.public
+    fun fetchId(id: Int): Account? {
+        return accounts.firstOrNull { it.id == id }
     }
 
     enum class Fetch {

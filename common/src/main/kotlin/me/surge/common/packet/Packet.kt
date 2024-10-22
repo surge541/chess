@@ -10,7 +10,6 @@ open class Packet(val id: String, private val properties: JSONObject) {
     fun write() = "${properties.put("id", id)}"
 
     fun respond(packet: Packet) {
-        //connection.getOutputStream().write((packet.write() + '\n').toByteArray(Charset.defaultCharset()))
         connection.send(packet)
     }
 
@@ -31,6 +30,7 @@ open class Packet(val id: String, private val properties: JSONObject) {
                 "cgameupt" -> ClientGameUpdate(obj)
                 "gupdatereq" -> GameUpdateRequestPacket(obj)
                 "gupdatereq-response" -> GameUpdateRequestPacket.GameUpdateRequestResponsePacket(obj)
+                "keep-alive" -> KeepAlivePacket(obj)
                 else -> Packet("unknown", obj)
             }.also {
                 it.connection = connection
